@@ -1,0 +1,3171 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="light"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxMjM1NjY5MjA5ODUyNTY1NjMxNiIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2MzZThjYzVhYjkxNGIwM2RfaW5kZXguaHRtbC0zNjYifSwiZXhwIjoxNzk0NDE3NDMxLCJpYXQiOjE3OTQ0MTM4MzEsImFsZyI6IlJTMjU2In0.Jl1zUTZaDGN0qzbDL9EZkLO2JUIalBfGTC7IbdlNnVgxPcnNaQqXuM-I6HE4-lVllmURiMI-ceVvhfSYYTQJljjNqUPHjbsHx7bgLYk5FAyqcweLszLBOaUFRXJ6FtEFg3ciXvZ72SahB0ONxwC19HJZ0qWYub0E-2ra7jMG9Fhk87i-9OF1C601XTcz6AniZW7BwP1mQS8qAGKnTPYGLQU0Oi8h8ch_Sf118z3qCUgW9HXQWvrBGre7-_u-vdmCI8iONtJhf-kojx8O7-dPPvxk1bd_31kiHX9njot3BM2KMpJmTL4Qwx8UTPickj4O-_BENA2uO3ECWb_TOeK4ag","c_c3e8cc5ab914b03d_index.html-366")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>THEO / ARCHIVE — 空间与材质意向档案</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono for Tabular Numbers -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            paper: {
+              light: '#F8F8F6',
+              card: '#F1F1EE',
+              dark: '#0E0E0E',
+              darkCard: '#171717'
+            }
+          },
+          transitionTimingFunction: {
+            'framer': 'cubic-bezier(0.22, 1, 0.36, 1)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --bg-primary: #F8F8F6;
+      --bg-secondary: #EFEFEC;
+      --text-primary: #111111;
+      --text-secondary: #666662;
+      --text-muted: #999993;
+      --border-hairline: rgba(17, 17, 17, 0.09);
+      --accent-edit: #2563EB;
+    }
+
+    html.dark {
+      --bg-primary: #0D0D0D;
+      --bg-secondary: #161616;
+      --text-primary: #F3F3F1;
+      --text-secondary: #9E9E98;
+      --text-muted: #5E5E5A;
+      --border-hairline: rgba(255, 255, 255, 0.11);
+      --accent-edit: #3B82F6;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+      transition: background-color 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Hairline borders matching Framer portfolio aesthetic */
+    .hairline-b { border-bottom: 1px solid var(--border-hairline); }
+    .hairline-t { border-top: 1px solid var(--border-hairline); }
+    .hairline-r { border-right: 1px solid var(--border-hairline); }
+    .hairline-l { border-left: 1px solid var(--border-hairline); }
+    .hairline-all { border: 1px solid var(--border-hairline); }
+
+    /* Framer-style Image Zoom & Reveal */
+    .framer-img-wrap {
+      overflow: hidden;
+      background-color: var(--bg-secondary);
+      position: relative;
+    }
+    .framer-img {
+      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), filter 0.5s ease, opacity 0.4s ease;
+      will-change: transform;
+    }
+    .group:hover .framer-img {
+      transform: scale(1.03);
+    }
+
+    /* Edit mode visual indicators */
+    body.edit-mode [contenteditable="true"] {
+      outline: 1px dashed rgba(37, 99, 235, 0.45);
+      outline-offset: 3px;
+      border-radius: 3px;
+      cursor: text;
+      transition: all 0.15s ease;
+    }
+    body.edit-mode [contenteditable="true"]:hover {
+      outline: 1px dashed rgba(37, 99, 235, 0.9);
+      background-color: rgba(37, 99, 235, 0.05);
+    }
+    body.edit-mode [contenteditable="true"]:focus {
+      outline: 2px solid #2563EB;
+      background-color: rgba(37, 99, 235, 0.08);
+    }
+
+    /* Custom subtle scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(128, 128, 128, 0.25);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(128, 128, 128, 0.45);
+    }
+
+    /* Tabular numbers */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Page transition animation */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-framer-in {
+      animation: fadeSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Floating hover preview for Index view */
+    #index-hover-preview {
+      pointer-events: none;
+      transition: opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1), transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:Inter, -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.top-0{top:0px}.bottom-5{bottom:1.25rem}.left-2{left:0.5rem}.right-2{right:0.5rem}.right-5{right:1.25rem}.right-3{right:0.75rem}.top-3{top:0.75rem}.left-3{left:0.75rem}.z-30{z-index:30}.z-40{z-index:40}.z-50{z-index:50}.z-10{z-index:10}.z-20{z-index:20}.mx-auto{margin-left:auto;margin-right:auto}.my-4{margin-top:1rem;margin-bottom:1rem}.mb-1\.5{margin-bottom:0.375rem}.mr-2{margin-right:0.5rem}.mb-1{margin-bottom:0.25rem}.mt-1{margin-top:0.25rem}.mt-20{margin-top:5rem}.line-clamp-2{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.aspect-\[4\/3\]{aspect-ratio:4/3}.aspect-\[16\/9\]{aspect-ratio:16/9}.h-1\.5{height:0.375rem}.h-16{height:4rem}.h-2{height:0.5rem}.h-3\.5{height:0.875rem}.h-4{height:1rem}.h-56{height:14rem}.h-7{height:1.75rem}.h-full{height:100%}.h-10{height:2.5rem}.max-h-\[74vh\]{max-height:74vh}.max-h-\[90vh\]{max-height:90vh}.min-h-screen{min-height:100vh}.w-1\.5{width:0.375rem}.w-2{width:0.5rem}.w-3\.5{width:0.875rem}.w-4{width:1rem}.w-7{width:1.75rem}.w-80{width:20rem}.w-full{width:100%}.w-10{width:2.5rem}.min-w-0{min-width:0px}.max-w-\[1680px\]{max-width:1680px}.max-w-xl{max-width:36rem}.max-w-3xl{max-width:48rem}.max-w-\[90vw\]{max-width:90vw}.max-w-lg{max-width:32rem}.max-w-md{max-width:28rem}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.translate-y-2{--tw-translate-y:0.5rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-pointer{cursor:pointer}.cursor-zoom-in{cursor:zoom-in}.select-none{-webkit-user-select:none;user-select:none}.list-inside{list-style-position:inside}.list-decimal{list-style-type:decimal}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-8{gap:2rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.gap-y-2{row-gap:0.5rem}.gap-x-2\.5{column-gap:0.625rem}.gap-x-8{column-gap:2rem}.gap-y-1{row-gap:0.25rem}.gap-y-14{row-gap:3.5rem}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-10 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2.5rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-8 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem * var(--tw-space-y-reverse))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-3\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.875rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.875rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-nowrap{white-space:nowrap}.whitespace-pre-line{white-space:pre-line}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-2xl{border-radius:1rem}.rounded-sm{border-radius:0.125rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-dashed{border-style:dashed}.border-blue-500\/20{border-color:rgb(59 130 246 / 0.2)}.border-blue-500\/40{border-color:rgb(59 130 246 / 0.4)}.bg-\[\#EFEFEC\]\/70{background-color:rgb(239 239 236 / 0.7)}.bg-\[\#F8F8F6\]\/85{background-color:rgb(248 248 246 / 0.85)}.bg-black\/\[0\.02\]{background-color:rgb(0 0 0 / 0.02)}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-neutral-400{--tw-bg-opacity:1;background-color:rgb(163 163 163 / var(--tw-bg-opacity, 1))}.bg-neutral-900{--tw-bg-opacity:1;background-color:rgb(23 23 23 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/15{background-color:rgb(255 255 255 / 0.15)}.bg-\[var\(--bg-primary\)\]{background-color:var(--bg-primary)}.bg-black\/60{background-color:rgb(0 0 0 / 0.6)}.bg-black\/95{background-color:rgb(0 0 0 / 0.95)}.bg-blue-500\/10{background-color:rgb(59 130 246 / 0.1)}.bg-blue-500\/\[0\.03\]{background-color:rgb(59 130 246 / 0.03)}.bg-blue-500\/\[0\.06\]{background-color:rgb(59 130 246 / 0.06)}.bg-blue-600\/10{background-color:rgb(37 99 235 / 0.1)}.bg-emerald-500\/10{background-color:rgb(16 185 129 / 0.1)}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.bg-transparent{background-color:transparent}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-black\/0{background-color:rgb(0 0 0 / 0)}.bg-white\/95{background-color:rgb(255 255 255 / 0.95)}.bg-black\/\[0\.015\]{background-color:rgb(0 0 0 / 0.015)}.bg-emerald-600\/90{background-color:rgb(5 150 105 / 0.9)}.object-contain{object-fit:contain}.object-cover{object-fit:cover}.p-0\.5{padding:0.125rem}.p-1\.5{padding:0.375rem}.p-1{padding:0.25rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.p-5{padding:1.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.pb-4{padding-bottom:1rem}.pb-5{padding-bottom:1.25rem}.pb-8{padding-bottom:2rem}.pt-2{padding-top:0.5rem}.pb-1{padding-bottom:0.25rem}.pt-12{padding-top:3rem}.pt-3{padding-top:0.75rem}.pt-1{padding-top:0.25rem}.pl-8{padding-left:2rem}.pt-4{padding-top:1rem}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, monospace}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-2xl{font-size:1.5rem;line-height:2rem}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.tabular-nums{--tw-numeric-spacing:tabular-nums;font-variant-numeric:var(--tw-ordinal) var(--tw-slashed-zero) var(--tw-numeric-figure) var(--tw-numeric-spacing) var(--tw-numeric-fraction)}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-\[-0\.025em\]{letter-spacing:-0.025em}.tracking-\[-0\.02em\]{letter-spacing:-0.02em}.tracking-tight{letter-spacing:-0.025em}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.tracking-\[-0\.01em\]{letter-spacing:-0.01em}.text-\[var\(--text-muted\)\]{color:var(--text-muted)}.text-\[var\(--text-primary\)\]{color:var(--text-primary)}.text-\[var\(--text-secondary\)\]{color:var(--text-secondary)}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-white\/80{color:rgb(255 255 255 / 0.8)}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-white\/60{color:rgb(255 255 255 / 0.6)}.text-white\/70{color:rgb(255 255 255 / 0.7)}.text-white\/90{color:rgb(255 255 255 / 0.9)}.text-neutral-900{--tw-text-opacity:1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.underline-offset-4{text-underline-offset:4px}.opacity-0{opacity:0}.opacity-60{opacity:0.6}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.ease-out{transition-timing-function:cubic-bezier(0, 0, 0.2, 1)}.selection\:bg-neutral-900 *::selection{--tw-bg-opacity:1;background-color:rgb(23 23 23 / var(--tw-bg-opacity, 1))}.selection\:text-white *::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.selection\:bg-neutral-900::selection{--tw-bg-opacity:1;background-color:rgb(23 23 23 / var(--tw-bg-opacity, 1))}.selection\:text-white::selection{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:bg-black\/5:hover{background-color:rgb(0 0 0 / 0.05)}.hover\:bg-blue-50:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.hover\:bg-white\/10:hover{background-color:rgb(255 255 255 / 0.1)}.hover\:bg-white\/25:hover{background-color:rgb(255 255 255 / 0.25)}.hover\:bg-blue-500\/20:hover{background-color:rgb(59 130 246 / 0.2)}.hover\:bg-blue-500\/\[0\.06\]:hover{background-color:rgb(59 130 246 / 0.06)}.hover\:bg-red-700:hover{--tw-bg-opacity:1;background-color:rgb(185 28 28 / var(--tw-bg-opacity, 1))}.hover\:bg-white\/20:hover{background-color:rgb(255 255 255 / 0.2)}.hover\:bg-black\/\[0\.035\]:hover{background-color:rgb(0 0 0 / 0.035)}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:text-\[var\(--text-primary\)\]:hover{color:var(--text-primary)}.hover\:opacity-70:hover{opacity:0.7}.hover\:opacity-90:hover{opacity:0.9}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-2:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-blue-600:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(37 99 235 / var(--tw-ring-opacity, 1))}.group:hover .group-hover\:-translate-x-0\.5{--tw-translate-x:-0.125rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:translate-y-0{--tw-translate-y:0px;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:translate-x-1{--tw-translate-x:0.25rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.group:hover .group-hover\:bg-black\/15{background-color:rgb(0 0 0 / 0.15)}.group:hover .group-hover\:opacity-100{opacity:1}.dark\:block:is(.dark *){display:block}.dark\:hidden:is(.dark *){display:none}.dark\:bg-\[\#0D0D0D\]\/85:is(.dark *){background-color:rgb(13 13 13 / 0.85)}.dark\:bg-\[\#151515\]\/90:is(.dark *){background-color:rgb(21 21 21 / 0.9)}.dark\:bg-white:is(.dark *){--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.dark\:bg-white\/\[0\.03\]:is(.dark *){background-color:rgb(255 255 255 / 0.03)}.dark\:bg-white\/\[0\.02\]:is(.dark *){background-color:rgb(255 255 255 / 0.02)}.dark\:text-neutral-900:is(.dark *){--tw-text-opacity:1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.dark\:text-blue-300:is(.dark *){--tw-text-opacity:1;color:rgb(147 197 253 / var(--tw-text-opacity, 1))}.dark\:text-blue-400:is(.dark *){--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.dark\:text-emerald-400:is(.dark *){--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.dark\:selection\:bg-white *:is(.dark *)::selection{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.dark\:selection\:text-neutral-900 *:is(.dark *)::selection{--tw-text-opacity:1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.dark\:selection\:bg-white:is(.dark *)::selection{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.dark\:selection\:text-neutral-900:is(.dark *)::selection{--tw-text-opacity:1;color:rgb(23 23 23 / var(--tw-text-opacity, 1))}.dark\:hover\:bg-white\/5:hover:is(.dark *){background-color:rgb(255 255 255 / 0.05)}.dark\:hover\:bg-white\/\[0\.04\]:hover:is(.dark *){background-color:rgb(255 255 255 / 0.04)}@media (min-width: 640px){.sm\:left-6{left:1.5rem}.sm\:right-6{right:1.5rem}.sm\:inline{display:inline}.sm\:h-12{height:3rem}.sm\:w-12{width:3rem}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-end{align-items:flex-end}.sm\:gap-2\.5{gap:0.625rem}.sm\:gap-y-16{row-gap:4rem}.sm\:p-8{padding:2rem}.sm\:px-8{padding-left:2rem;padding-right:2rem}.sm\:py-10{padding-top:2.5rem;padding-bottom:2.5rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-\[15px\]{font-size:15px}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}.sm\:text-\[13px\]{font-size:13px}}@media (min-width: 768px){.md\:col-span-5{grid-column:span 5 / span 5}.md\:col-span-7{grid-column:span 7 / span 7}.md\:inline-block{display:inline-block}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-12{grid-template-columns:repeat(12, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:col-span-3{grid-column:span 3 / span 3}.lg\:col-span-4{grid-column:span 4 / span 4}.lg\:col-span-5{grid-column:span 5 / span 5}.lg\:col-span-6{grid-column:span 6 / span 6}.lg\:grid-cols-12{grid-template-columns:repeat(12, minmax(0, 1fr))}.lg\:border-l{border-left-width:1px}.lg\:border-\[var\(--border-hairline\)\]{border-color:var(--border-hairline)}.lg\:pl-8{padding-left:2rem}.lg\:pl-10{padding-left:2.5rem}}@media (min-width: 1280px){.xl\:flex{display:flex}.xl\:hidden{display:none}}</style></head>
+<body class="min-h-screen flex flex-col selection:bg-neutral-900 selection:text-white dark:selection:bg-white dark:selection:text-neutral-900">
+
+  <!-- TOP EDIT MODE STATUS BANNER (Only visible when Edit Mode is active) -->
+  <div id="edit-mode-banner" class="hidden sticky top-0 z-50 bg-blue-600 text-white text-xs py-2 px-4 sm:px-8 flex flex-wrap items-center justify-between gap-2 shadow-md">
+    <div class="flex items-center gap-2.5">
+      <span class="inline-block w-2 h-2 rounded-full bg-white animate-pulse"></span>
+      <span class="font-medium tracking-wide">正在使用「可视化编辑模式」：直接点击页面上的任何文字即可修改；悬停在图片上可上传替换本地照片或调整顺序。</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="openNewProjectModal()" class="px-2.5 py-1 rounded bg-white/15 hover:bg-white/25 text-white font-medium transition flex items-center gap-1">
+        <span>+ 新增意向项目</span>
+      </button>
+      <button onclick="openExportModal()" class="px-2.5 py-1 rounded bg-white text-blue-700 font-semibold hover:bg-blue-50 transition flex items-center gap-1 shadow-sm">
+        <span>导出/发布汇报网页</span>
+      </button>
+      <button onclick="resetToDefaultConfirm()" class="px-2 py-1 rounded text-white/80 hover:text-white hover:bg-white/10 transition" title="恢复初始示例数据">
+        重置模板
+      </button>
+    </div>
+  </div>
+
+  <!-- STICKY HEADER (1:1 Theo Portfolio Minimalist Header) -->
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-[#F8F8F6]/85 dark:bg-[#0D0D0D]/85 hairline-b transition-colors duration-300">
+    <div class="max-w-[1680px] mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Left: Brand / Portfolio Title -->
+      <div class="flex items-center gap-4 min-w-0">
+        <a href="#home" onclick="handleLogoClick(event)" class="group flex items-baseline gap-3 truncate">
+          <span id="site-brand" class="text-sm sm:text-[15px] font-semibold tracking-[-0.02em] uppercase truncate" onblur="updateSiteMeta('brand', this.innerText)" contenteditable="false">THEO / ARCHIVE</span>
+          <span id="site-subtitle" class="hidden md:inline-block text-xs text-[var(--text-secondary)] tracking-wide truncate" onblur="updateSiteMeta('subtitle', this.innerText)" contenteditable="false">SPATIAL &amp; MATERIAL DIRECTION — 空间意向档案</span>
+        </a>
+      </div>
+
+      <!-- Center: Category Pills (Visible in Home View on Desktop) -->
+      <nav id="header-category-nav" class="hidden xl:flex items-center gap-1 overflow-x-auto max-w-xl py-1"><button onclick="filterByCategory('ALL')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      全部 All (6)
+                    </button><button onclick="filterByCategory('会所展厅 Pavilion')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm">
+                      会所展厅 Pavilion
+                    </button><button onclick="filterByCategory('商业空间 Commercial')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      商业空间 Commercial
+                    </button><button onclick="filterByCategory('材质细部 Materiality')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      材质细部 Materiality
+                    </button><button onclick="filterByCategory('餐饮空间 Hospitality')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      餐饮空间 Hospitality
+                    </button><button onclick="filterByCategory('建筑立面 Facade')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      建筑立面 Facade
+                    </button><button onclick="filterByCategory('软装陈设 FF&amp;E')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      软装陈设 FF&amp;E
+                    </button></nav>
+
+      <!-- Right: View Switcher + Info + Theme + Edit Controls -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        
+        <!-- Layout Switcher (Grid / Editorial / Index) - Visible on Home View -->
+        <div id="home-layout-switcher" class="flex items-center p-0.5 rounded-lg hairline-all bg-black/[0.02] dark:bg-white/[0.03]">
+          <button onclick="setHomeLayout('grid')" id="layout-btn-grid" class="px-2.5 py-1 rounded-md text-xs font-medium bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm transition-all" title="网格画廊视图 (Grid)">
+            Grid
+          </button>
+          <button onclick="setHomeLayout('editorial')" id="layout-btn-editorial" class="px-2.5 py-1 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all" title="大幅画册视图 (Editorial)">
+            Editorial
+          </button>
+          <button onclick="setHomeLayout('index')" id="layout-btn-index" class="px-2.5 py-1 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all" title="目录索引视图 (Index)">
+            Index
+          </button>
+        </div>
+
+        <!-- Info / Brief Drawer Toggle -->
+        <button onclick="toggleInfoDrawer()" id="info-drawer-btn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium hairline-all hover:bg-black/5 dark:hover:bg-white/5 transition flex items-center gap-1.5">
+          <span>汇报说明</span>
+          <span class="font-mono text-[10px] opacity-60">INFO</span>
+        </button>
+
+        <!-- Light / Dark Theme Toggle -->
+        <button onclick="toggleTheme()" class="p-1.5 rounded-lg hairline-all hover:bg-black/5 dark:hover:bg-white/5 transition text-[var(--text-primary)]" title="切换浅色/深色看图模式">
+          <svg id="theme-icon-dark" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <svg id="theme-icon-light" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
+        <!-- Edit Controls Wrapper (Hidden in Pure Presentation Mode unless unlocked with Shift+E) -->
+        <div id="authoring-controls" class="flex items-center gap-1.5">
+          <button onclick="toggleEditMode()" id="edit-mode-btn" class="px-3 py-1.5 rounded-lg text-xs font-medium hairline-all transition flex items-center gap-1.5 hover:bg-black/5 dark:hover:bg-white/5">
+            <span id="edit-dot" class="w-1.5 h-1.5 rounded-full bg-neutral-400"></span>
+            <span id="edit-mode-label">编辑内容</span>
+          </button>
+
+          <button onclick="openExportModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 hover:opacity-90 transition flex items-center gap-1.5 shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 10l5 5 5-5M12 15V3"></path>
+            </svg>
+            <span class="hidden sm:inline">生成汇报网页</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile / Tablet Secondary Category Filter Bar -->
+    <div id="mobile-category-bar" class="xl:hidden px-4 sm:px-8 py-2 hairline-t flex items-center gap-1.5 overflow-x-auto no-scrollbar"><button onclick="filterByCategory('ALL')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      全部 All (6)
+                    </button><button onclick="filterByCategory('会所展厅 Pavilion')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm">
+                      会所展厅 Pavilion
+                    </button><button onclick="filterByCategory('商业空间 Commercial')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      商业空间 Commercial
+                    </button><button onclick="filterByCategory('材质细部 Materiality')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      材质细部 Materiality
+                    </button><button onclick="filterByCategory('餐饮空间 Hospitality')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      餐饮空间 Hospitality
+                    </button><button onclick="filterByCategory('建筑立面 Facade')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      建筑立面 Facade
+                    </button><button onclick="filterByCategory('软装陈设 FF&amp;E')" class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5">
+                      软装陈设 FF&amp;E
+                    </button></div>
+  </header>
+
+  <!-- COLLAPSIBLE INFO / PRESENTATION BRIEF DRAWER -->
+  <section id="info-drawer" class="hidden hairline-b bg-[#EFEFEC]/70 dark:bg-[#151515]/90 backdrop-blur-md transition-all">
+    <div class="max-w-[1680px] mx-auto px-4 sm:px-8 py-8 sm:py-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div class="lg:col-span-5 space-y-3">
+        <div class="text-[11px] font-mono uppercase tracking-widest text-[var(--text-secondary)]">CURATORIAL BRIEF / 意向汇报总说明</div>
+        <h2 id="info-title" class="text-xl sm:text-2xl font-medium tracking-tight leading-snug" onblur="updateSiteMeta('infoTitle', this.innerText)" contenteditable="false">2026 第三季度空间氛围与材质细部意向提案</h2>
+        <p id="info-desc" class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed" onblur="updateSiteMeta('infoDesc', this.innerText)" contenteditable="false">本档案汇集了近期针对项目前场灰空间、核心接待展厅、定制家具收口及建筑立面光影的参考意向。点击任一项目封面即可进入内部查看多角度细部节点分析与材质搭配建议。</p>
+      </div>
+      <div class="lg:col-span-4 space-y-3 lg:border-l lg:border-[var(--border-hairline)] lg:pl-8">
+        <div class="text-[11px] font-mono uppercase tracking-widest text-[var(--text-secondary)]">KEY DIRECTION / 核心推导方向</div>
+        <div id="info-directions" class="text-xs sm:text-sm text-[var(--text-secondary)] space-y-1.5 leading-relaxed" onblur="updateSiteMeta('infoDirections', this.innerText)" contenteditable="false">1. 降低高饱和装饰，采用天然洞石、深色烟熏橡木与手工肌理涂料构建静谧基调；<br>2. 强调「克制的结构感」，在体块交接处预留 8-12mm 工艺留缝与洗墙暗藏灯槽；<br>3. 家具选型偏向低重心、建筑感廓形，与硬装体块融为一体。</div>
+      </div>
+      <div class="lg:col-span-3 flex flex-col justify-between lg:border-l lg:border-[var(--border-hairline)] lg:pl-8 space-y-4">
+        <div class="space-y-2">
+          <div class="text-[11px] font-mono uppercase tracking-widest text-[var(--text-secondary)]">METADATA / 档案信息</div>
+          <div class="grid grid-cols-2 gap-y-2 text-xs">
+            <span class="text-[var(--text-secondary)]">整理汇报：</span>
+            <span id="info-author" class="font-medium" onblur="updateSiteMeta('infoAuthor', this.innerText)" contenteditable="false">设计师助理 / 方案组</span>
+            <span class="text-[var(--text-secondary)]">审阅对象：</span>
+            <span id="info-reviewer" class="font-medium" onblur="updateSiteMeta('infoReviewer', this.innerText)" contenteditable="false">设计总监 / 主创团队</span>
+            <span class="text-[var(--text-secondary)]">更新日期：</span>
+            <span id="info-date" class="font-mono" onblur="updateSiteMeta('infoDate', this.innerText)" contenteditable="false">2026.11</span>
+          </div>
+        </div>
+        <div class="pt-2 flex items-center justify-between">
+          <span class="text-[11px] font-mono text-[var(--text-muted)]">ANY DEVICE READY · 支持手机/iPad/桌面端审阅</span>
+          <button onclick="toggleInfoDrawer()" class="text-xs underline underline-offset-4 hover:opacity-70">收起说明 ↑</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-[1680px] w-full mx-auto px-4 sm:px-8 py-6 sm:py-10">
+
+    <!-- ==================== VIEW 1: HOME GALLERY VIEW ==================== -->
+    <div id="view-home" class="space-y-8">
+      
+      <!-- Subtle Hero Editorial Strip (Theo Portfolio style top bar) -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-5 hairline-b">
+        <div>
+          <p id="hero-kicker" class="text-[11px] font-mono uppercase tracking-widest text-[var(--text-secondary)] mb-1.5" onblur="updateSiteMeta('heroKicker', this.innerText)" contenteditable="false">SELECTED REFERENCE ARCHIVE — 点击任意图片进入项目细部图集</p>
+          <h1 id="hero-headline" class="text-xl sm:text-3xl font-normal tracking-[-0.025em] leading-tight" onblur="updateSiteMeta('heroHeadline', this.innerText)" contenteditable="false">空间叙事、材质交接与光影尺度意向库</h1>
+        </div>
+        <div class="flex items-center gap-4 text-xs font-mono text-[var(--text-secondary)]">
+          <span id="project-count-indicator">01 PROJECTS / 25 REFERENCES</span>
+        </div>
+      </div>
+
+      <!-- Dynamic Portfolio Grid / Editorial / Index Container -->
+      <div id="portfolio-container"><div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-14 sm:gap-y-16">
+            <article class="group flex flex-col space-y-3.5 animate-framer-in">
+              <!-- Image Container -->
+              <div class="framer-img-wrap aspect-[4/3] w-full rounded-sm cursor-pointer hairline-all" onclick="handleCardClick(event, 'proj-01')">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=1600&amp;q=85" alt="前场落客区与连廊灰空间" onerror="this.src='https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Image'" class="framer-img w-full h-full object-cover">
+
+                <!-- Subtle Top-Right Image Count Badge -->
+                <div class="absolute top-3 right-3 px-2.5 py-1 rounded bg-black/60 backdrop-blur-md text-white font-mono text-[10px] tracking-wider uppercase flex items-center gap-1.5">
+                  <span>5 IMAGES</span>
+                  <span>↗</span>
+                </div>
+
+                <!-- Hover Prompt Overlay (When NOT in Edit Mode) -->
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors flex items-end p-5 opacity-0 group-hover:opacity-100">
+                         <span class="px-3 py-1.5 rounded-full bg-white/95 text-neutral-900 text-xs font-medium shadow-lg translate-y-2 group-hover:translate-y-0 transition-transform">
+                           点击查看项目内 5 张细部意向图 →
+                         </span>
+                       </div>
+
+                <!-- Edit Mode Overlay Toolbar on Cover Card -->
+                
+              </div>
+
+              <!-- Editorial Caption Bar (1:1 Theo Portfolio Typography) -->
+              <div class="pt-1 flex items-start justify-between gap-4">
+                <div class="flex items-baseline gap-3 min-w-0 flex-1">
+                  <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums shrink-0">01</span>
+                  <div class="min-w-0 flex-1 space-y-1">
+                    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <h3 class="text-base sm:text-lg font-medium tracking-[-0.01em] leading-snug cursor-pointer" contenteditable="false" onclick="if(!isEditMode) openProjectDetail('proj-01', true)" onblur="updateProjectField('proj-01', 'title', this.innerText)">前场落客区与连廊灰空间</h3>
+                      <span class="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]" contenteditable="false" onblur="updateProjectField('proj-01', 'subtitle', this.innerText)">ARRIVAL COURTYARD &amp; THRESHOLD</span>
+                    </div>
+                    <p class="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed" contenteditable="false" onblur="updateProjectField('proj-01', 'description', this.innerText)">前场不追求高耸张扬的门头，而是通过刻意压低的水平挑檐将视线引导至地面静水池与远端庭院苔藓景观。建筑体块交接处采用深灰乱纹不锈钢包边，消解厚重石材的体量感，营造由喧嚣城市步入静谧内院的情绪转换。</p>
+                  </div>
+                </div>
+
+                <div class="text-right shrink-0 space-y-1">
+                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] hairline-all text-[var(--text-secondary)]" contenteditable="false" onblur="updateProjectField('proj-01', 'category', this.innerText)">会所展厅 Pavilion</span>
+                  <div class="text-[11px] font-mono text-[var(--text-muted)]" contenteditable="false" onblur="updateProjectField('proj-01', 'location', this.innerText)">Ref: Aman Kyoto / Kengo Kuma</div>
+                </div>
+              </div>
+            </article>
+          </div></div>
+
+      <!-- Floating Image Preview for Index Mode -->
+      <div id="index-hover-preview" class="fixed z-30 hidden w-80 h-56 rounded-lg overflow-hidden shadow-2xl hairline-all bg-neutral-900 opacity-0">
+        <img id="index-hover-img" src="" alt="Preview" class="w-full h-full object-cover">
+      </div>
+
+    </div>
+
+    <!-- ==================== VIEW 2: PROJECT DETAIL PAGE ==================== -->
+    <div id="view-detail" class="space-y-10 animate-framer-in hidden">
+      
+      <!-- Detail Top Navigation Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-4 pb-4 hairline-b">
+        <button onclick="navigateHome()" class="group inline-flex items-center gap-2 text-xs sm:text-sm font-medium hover:opacity-70 transition">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-full hairline-all group-hover:-translate-x-0.5 transition-transform">←</span>
+          <span>返回全部意向 (Back to Archive)</span>
+        </button>
+
+        <div id="detail-index-indicator" class="text-xs font-mono tracking-widest text-[var(--text-secondary)] tabular-nums">PROJECT 01 / 06 — ARRIVAL COURTYARD &amp; THRESHOLD</div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="navigateAdjacentProject(-1)" class="px-3 py-1.5 rounded-lg text-xs font-medium hairline-all hover:bg-black/5 dark:hover:bg-white/5 transition">
+            ← 上一组
+          </button>
+          <button onclick="navigateAdjacentProject(1)" class="px-3 py-1.5 rounded-lg text-xs font-medium hairline-all hover:bg-black/5 dark:hover:bg-white/5 transition">
+            下一组 →
+          </button>
+        </div>
+      </div>
+
+      <!-- Project Editorial Header (Two-Column Architectural Spec Sheet) -->
+      <div id="detail-header-container" class="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-8 hairline-b">
+        <div class="lg:col-span-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-xs px-2 py-0.5 rounded hairline-all text-[var(--text-secondary)] tabular-nums">NO. 01</span>
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)]" contenteditable="false" onblur="updateProjectField('proj-01', 'category', this.innerText)">会所展厅 Pavilion</span>
+          </div>
+
+          <div class="space-y-1.5">
+            <h1 class="text-2xl sm:text-4xl font-normal tracking-[-0.025em] leading-tight" contenteditable="false" onblur="updateProjectField('proj-01', 'title', this.innerText)">前场落客区与连廊灰空间</h1>
+            <p class="text-xs sm:text-sm font-mono uppercase tracking-widest text-[var(--text-muted)]" contenteditable="false" onblur="updateProjectField('proj-01', 'subtitle', this.innerText)">ARRIVAL COURTYARD &amp; THRESHOLD</p>
+          </div>
+
+          <div class="pt-2 flex flex-wrap items-center gap-2">
+            
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs hairline-all bg-black/[0.02] dark:bg-white/[0.03]">
+            <span contenteditable="false" onblur="updateProjectTag('proj-01', 0, this.innerText)">灰空间过渡</span>
+            
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs hairline-all bg-black/[0.02] dark:bg-white/[0.03]">
+            <span contenteditable="false" onblur="updateProjectTag('proj-01', 1, this.innerText)">压低檐口</span>
+            
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs hairline-all bg-black/[0.02] dark:bg-white/[0.03]">
+            <span contenteditable="false" onblur="updateProjectTag('proj-01', 2, this.innerText)">静水面反射</span>
+            
+          </span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs hairline-all bg-black/[0.02] dark:bg-white/[0.03]">
+            <span contenteditable="false" onblur="updateProjectTag('proj-01', 3, this.innerText)">石材肌理</span>
+            
+          </span>
+            
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 space-y-6 lg:border-l lg:border-[var(--border-hairline)] lg:pl-10">
+          <div class="space-y-2">
+            <div class="text-[11px] font-mono uppercase tracking-widest text-[var(--text-muted)]">CURATORIAL &amp; SPATIAL NOTES / 空间意向推导说明</div>
+            <p class="text-sm sm:text-[15px] text-[var(--text-primary)] leading-relaxed whitespace-pre-line" contenteditable="false" onblur="updateProjectField('proj-01', 'description', this.innerText)">前场不追求高耸张扬的门头，而是通过刻意压低的水平挑檐将视线引导至地面静水池与远端庭院苔藓景观。建筑体块交接处采用深灰乱纹不锈钢包边，消解厚重石材的体量感，营造由喧嚣城市步入静谧内院的情绪转换。</p>
+          </div>
+
+          <!-- Architectural Technical Spec Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 hairline-t text-xs">
+            <div>
+              <div class="text-[10px] font-mono uppercase text-[var(--text-muted)] mb-1">REFERENCE / 参考对标</div>
+              <div class="font-medium text-[var(--text-secondary)]" contenteditable="false" onblur="updateProjectField('proj-01', 'location', this.innerText)">Ref: Aman Kyoto / Kengo Kuma</div>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono uppercase text-[var(--text-muted)] mb-1">KEY MATERIAL / 核心材质建议</div>
+              <div class="font-medium text-[var(--text-secondary)]" contenteditable="false" onblur="updateProjectField('proj-01', 'material', this.innerText)">深灰乱纹不锈钢、酸洗玄武岩、碳化木格栅</div>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono uppercase text-[var(--text-muted)] mb-1">SCALE &amp; LIGHTING / 尺度与光影</div>
+              <div class="font-medium text-[var(--text-secondary)]" contenteditable="false" onblur="updateProjectField('proj-01', 'lighting', this.innerText)">2700K 地面洗墙暗槽 + 顶部防眩点光源</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Sub-Gallery Toolbar (Layout Switcher & Batch Upload in Edit Mode) -->
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)]">细部意向图集 (REFERENCE PLATES)</span>
+          <span id="detail-image-count-badge" class="px-2 py-0.5 text-[11px] font-mono rounded hairline-all text-[var(--text-secondary)]">5 PLATES</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Edit Mode Only: Add Sub-Image Buttons -->
+          <div id="detail-edit-upload-bar" class="hidden items-center gap-2 mr-2">
+            <label class="cursor-pointer px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700 transition inline-flex items-center gap-1.5 shadow-sm">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>批量上传本地意向图</span>
+              <input type="file" accept="image/*" multiple="" class="hidden" onchange="handleBatchSubImageUpload(event)">
+            </label>
+            <button onclick="openAddSubImageUrlModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium hairline-all bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 transition">
+              + 粘贴图片链接
+            </button>
+          </div>
+
+          <!-- Detail Gallery Layout Switcher -->
+          <div class="flex items-center p-0.5 rounded-lg hairline-all bg-black/[0.02] dark:bg-white/[0.03]">
+            <button onclick="setDetailLayout('two-col')" id="detail-layout-two-col" class="px-2.5 py-1 rounded-md text-xs font-medium bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm transition-all">
+              双列画册
+            </button>
+            <button onclick="setDetailLayout('full')" id="detail-layout-full" class="px-2.5 py-1 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all">
+              通栏大图
+            </button>
+            <button onclick="setDetailLayout('compact')" id="detail-layout-compact" class="px-2.5 py-1 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all">
+              九宫格对比
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Sub-Images Grid Container -->
+      <div id="detail-images-container"><div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-14">
+            <figure class="group flex flex-col space-y-3">
+              <div class="framer-img-wrap aspect-[4/3] w-full rounded-sm hairline-all cursor-zoom-in" onclick="openLightbox('proj-01', 0)">
+                <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=1600&amp;q=85" alt="水平挑檐与静水面比例关系" onerror="this.src='https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Plate'" class="framer-img w-full h-full object-cover">
+
+                <!-- Plate Index Pill -->
+                <div class="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-white font-mono text-[11px] tabular-nums">
+                  01.1
+                </div>
+
+                <div class="absolute top-3 right-3 px-2 py-0.5 rounded bg-emerald-600/90 text-white font-mono text-[10px] uppercase tracking-wider">
+                         项目主封面 COVER
+                       </div>
+
+                <!-- Edit Mode Toolbar on each Sub-Image -->
+                
+              </div>
+
+              <!-- Sub-Image Node Title & Design Analysis Note -->
+              <figcaption class="pt-1 flex items-start justify-between gap-4">
+                <div class="space-y-1 flex-1">
+                  <div class="flex items-baseline gap-2.5">
+                    <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums">01.1</span>
+                    <h4 class="text-sm sm:text-[15px] font-medium text-[var(--text-primary)]" contenteditable="false" onblur="updateSubImageField('proj-01', 0, 'title', this.innerText)">水平挑檐与静水面比例关系</h4>
+                  </div>
+                  <p class="text-xs sm:text-[13px] text-[var(--text-secondary)] leading-relaxed pl-8" contenteditable="false" onblur="updateSubImageField('proj-01', 0, 'note', this.innerText)">挑檐下沿控制在 2.65m 亲人尺度，水面采用黑色火烧面花岗岩铺底，形成完整的建筑倒影。</p>
+                </div>
+              </figcaption>
+            </figure>
+          
+            <figure class="group flex flex-col space-y-3">
+              <div class="framer-img-wrap aspect-[4/3] w-full rounded-sm hairline-all cursor-zoom-in" onclick="openLightbox('proj-01', 1)">
+                <img src="https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Plate" alt="连廊侧墙洞石分缝与漫反射采光" onerror="this.src='https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Plate'" class="framer-img w-full h-full object-cover">
+
+                <!-- Plate Index Pill -->
+                <div class="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-white font-mono text-[11px] tabular-nums">
+                  01.2
+                </div>
+
+                
+
+                <!-- Edit Mode Toolbar on each Sub-Image -->
+                
+              </div>
+
+              <!-- Sub-Image Node Title & Design Analysis Note -->
+              <figcaption class="pt-1 flex items-start justify-between gap-4">
+                <div class="space-y-1 flex-1">
+                  <div class="flex items-baseline gap-2.5">
+                    <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums">01.2</span>
+                    <h4 class="text-sm sm:text-[15px] font-medium text-[var(--text-primary)]" contenteditable="false" onblur="updateSubImageField('proj-01', 1, 'title', this.innerText)">连廊侧墙洞石分缝与漫反射采光</h4>
+                  </div>
+                  <p class="text-xs sm:text-[13px] text-[var(--text-secondary)] leading-relaxed pl-8" contenteditable="false" onblur="updateSubImageField('proj-01', 1, 'note', this.innerText)">墙面采用 900×450mm 罗马洞石工字错缝干挂，顶部预留 180mm 天光缝隙引入自然侧光。</p>
+                </div>
+              </figcaption>
+            </figure>
+          
+            <figure class="group flex flex-col space-y-3">
+              <div class="framer-img-wrap aspect-[4/3] w-full rounded-sm hairline-all cursor-zoom-in" onclick="openLightbox('proj-01', 2)">
+                <img src="https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Plate" alt="入口转角框景与框线收口细部" onerror="this.src='https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Plate'" class="framer-img w-full h-full object-cover">
+
+                <!-- Plate Index Pill -->
+                <div class="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-white font-mono text-[11px] tabular-nums">
+                  01.3
+                </div>
+
+                
+
+                <!-- Edit Mode Toolbar on each Sub-Image -->
+                
+              </div>
+
+              <!-- Sub-Image Node Title & Design Analysis Note -->
+              <figcaption class="pt-1 flex items-start justify-between gap-4">
+                <div class="space-y-1 flex-1">
+                  <div class="flex items-baseline gap-2.5">
+                    <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums">01.3</span>
+                    <h4 class="text-sm sm:text-[15px] font-medium text-[var(--text-primary)]" contenteditable="false" onblur="updateSubImageField('proj-01', 2, 'title', this.innerText)">入口转角框景与框线收口细部</h4>
+                  </div>
+                  <p class="text-xs sm:text-[13px] text-[var(--text-secondary)] leading-relaxed pl-8" contenteditable="false" onblur="updateSubImageField('proj-01', 2, 'note', this.innerText)">无框超白玻嵌入地面与顶面 15mm U型不锈钢槽内，最大化室内外景观渗透。</p>
+                </div>
+              </figcaption>
+            </figure>
+          
+            <figure class="group flex flex-col space-y-3">
+              <div class="framer-img-wrap aspect-[4/3] w-full rounded-sm hairline-all cursor-zoom-in" onclick="openLightbox('proj-01', 3)">
+                <img src="https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Plate" alt="夜间洗墙灯光与汀步引导" onerror="this.src='https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Plate'" class="framer-img w-full h-full object-cover">
+
+                <!-- Plate Index Pill -->
+                <div class="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-white font-mono text-[11px] tabular-nums">
+                  01.4
+                </div>
+
+                
+
+                <!-- Edit Mode Toolbar on each Sub-Image -->
+                
+              </div>
+
+              <!-- Sub-Image Node Title & Design Analysis Note -->
+              <figcaption class="pt-1 flex items-start justify-between gap-4">
+                <div class="space-y-1 flex-1">
+                  <div class="flex items-baseline gap-2.5">
+                    <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums">01.4</span>
+                    <h4 class="text-sm sm:text-[15px] font-medium text-[var(--text-primary)]" contenteditable="false" onblur="updateSubImageField('proj-01', 3, 'title', this.innerText)">夜间洗墙灯光与汀步引导</h4>
+                  </div>
+                  <p class="text-xs sm:text-[13px] text-[var(--text-secondary)] leading-relaxed pl-8" contenteditable="false" onblur="updateSubImageField('proj-01', 3, 'note', this.innerText)">取消传统高杆庭院灯，所有照明隐藏于挑檐与汀步侧下沿，见光不见灯。</p>
+                </div>
+              </figcaption>
+            </figure>
+          
+            <figure class="group flex flex-col space-y-3">
+              <div class="framer-img-wrap aspect-[4/3] w-full rounded-sm hairline-all cursor-zoom-in" onclick="openLightbox('proj-01', 4)">
+                <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&amp;fit=crop&amp;w=1600&amp;q=85" alt="入户厚重木门与黄铜拉手尺度" onerror="this.src='https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Plate'" class="framer-img w-full h-full object-cover">
+
+                <!-- Plate Index Pill -->
+                <div class="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-white font-mono text-[11px] tabular-nums">
+                  01.5
+                </div>
+
+                
+
+                <!-- Edit Mode Toolbar on each Sub-Image -->
+                
+              </div>
+
+              <!-- Sub-Image Node Title & Design Analysis Note -->
+              <figcaption class="pt-1 flex items-start justify-between gap-4">
+                <div class="space-y-1 flex-1">
+                  <div class="flex items-baseline gap-2.5">
+                    <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums">01.5</span>
+                    <h4 class="text-sm sm:text-[15px] font-medium text-[var(--text-primary)]" contenteditable="false" onblur="updateSubImageField('proj-01', 4, 'title', this.innerText)">入户厚重木门与黄铜拉手尺度</h4>
+                  </div>
+                  <p class="text-xs sm:text-[13px] text-[var(--text-secondary)] leading-relaxed pl-8" contenteditable="false" onblur="updateSubImageField('proj-01', 4, 'note', this.innerText)">整板 85mm 厚烟熏橡木枢轴门（Pivot Door），搭配定制做旧铸铜竖向长拉手。</p>
+                </div>
+              </figcaption>
+            </figure>
+          </div></div>
+
+      <!-- Edit Mode Dropzone inside Project Detail -->
+      <div id="detail-dropzone" class="hidden border-2 border-dashed border-blue-500/40 rounded-xl p-8 text-center bg-blue-500/[0.03] hover:bg-blue-500/[0.06] transition" ondragover="event.preventDefault(); this.classList.add('border-blue-600');" ondragleave="this.classList.remove('border-blue-600');" ondrop="handleDetailDrop(event)">
+        <div class="max-w-md mx-auto space-y-2">
+          <div class="w-10 h-10 rounded-full bg-blue-600/10 text-blue-600 flex items-center justify-center mx-auto font-mono text-lg">+</div>
+          <p class="text-sm font-medium">拖拽多张图片到此处，或点击上方「批量上传本地意向图」</p>
+          <p class="text-xs text-[var(--text-secondary)]">系统会自动将高清大图智能优化压缩并保存在页面中，支持 JPG / PNG / WEBP，每张图片均可单独撰写部位名称与设计说明。</p>
+        </div>
+      </div>
+
+      <!-- Next Project Editorial Footer Card (1:1 Theo Portfolio Next Project Jump) -->
+      <div id="detail-next-project-banner" class="pt-12 hairline-t">
+        <div onclick="openProjectDetail('proj-02', true)" class="group cursor-pointer grid grid-cols-1 md:grid-cols-12 gap-6 items-center p-6 sm:p-8 rounded-xl hairline-all bg-black/[0.015] dark:bg-white/[0.02] hover:bg-black/[0.035] dark:hover:bg-white/[0.04] transition">
+          <div class="md:col-span-7 space-y-2">
+            <div class="text-[11px] font-mono uppercase tracking-widest text-[var(--text-muted)]">
+              NEXT ARCHIVE PROJECT / 下一组空间意向 (02 / 06)
+            </div>
+            <h3 class="text-xl sm:text-2xl font-medium group-hover:translate-x-1 transition-transform">
+              极简零售展陈与中岛体块 →
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)] line-clamp-2 max-w-xl">空间以单一低饱和度矿物微水泥包裹天地墙，将视觉重心完全交还给空间中央的巨型体块岛台。拉丝不锈钢的冷冽工业感与天然莱姆石的温润气孔形成戏剧性触觉张力，适合作为核心展陈区或品牌沙龙接待区。</p>
+          </div>
+          <div class="md:col-span-5">
+            <div class="framer-img-wrap aspect-[16/9] rounded-sm hairline-all">
+              <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&amp;fit=crop&amp;w=1600&amp;q=85" alt="极简零售展陈与中岛体块" class="framer-img w-full h-full object-cover">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MINIMALIST FOOTER -->
+  <footer class="mt-20 hairline-t py-8 px-4 sm:px-8 text-xs text-[var(--text-secondary)]">
+    <div class="max-w-[1680px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span id="footer-copyright" onblur="updateSiteMeta('footerText', this.innerText)" contenteditable="false">THEO / ARCHIVE — 建筑与室内空间意向汇报系统</span>
+        <span class="text-[var(--text-muted)]">·</span>
+        <span class="font-mono text-[11px] text-[var(--text-muted)]">1:1 FRAMER EDITORIAL EDITION</span>
+      </div>
+      <div class="flex items-center gap-5">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="hover:text-[var(--text-primary)] transition font-mono">
+          BACK TO TOP ↑
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== FULLSCREEN LIGHTBOX VIEWER ==================== -->
+  <div id="lightbox-modal" class="fixed inset-0 z-50 hidden bg-black/95 text-white flex flex-col justify-between p-4 sm:p-8 select-none backdrop-blur-md">
+    <!-- Top bar -->
+    <div class="flex items-center justify-between gap-4 z-10">
+      <div class="flex items-center gap-3">
+        <span id="lightbox-counter" class="font-mono text-xs px-2.5 py-1 rounded bg-white/10 text-white/90 tabular-nums">01.1 / 05</span>
+        <span id="lightbox-project-title" class="text-xs text-white/60 hidden sm:inline"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleLightboxZoom()" id="lightbox-zoom-btn" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-mono transition">
+          ZOOM 1.8x
+        </button>
+        <button onclick="closeLightbox()" class="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-medium transition">
+          关闭 (ESC) ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Image Canvas -->
+    <div class="relative flex-1 flex items-center justify-center overflow-hidden my-4" onclick="handleLightboxBackdropClick(event)">
+      <button onclick="stepLightbox(-1)" class="absolute left-2 sm:left-6 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition" title="上一张 (←)">
+        ←
+      </button>
+
+      <img id="lightbox-img" src="" alt="Full reference" class="max-h-[74vh] max-w-[90vw] object-contain transition-transform duration-300 ease-out cursor-zoom-in rounded-sm shadow-2xl" onclick="toggleLightboxZoom()">
+
+      <button onclick="stepLightbox(1)" class="absolute right-2 sm:right-6 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition" title="下一张 (→)">
+        →
+      </button>
+    </div>
+
+    <!-- Bottom Caption & Spatial Note -->
+    <div class="max-w-3xl mx-auto w-full text-center space-y-1.5 z-10 pb-1">
+      <h4 id="lightbox-caption-title" class="text-sm sm:text-base font-medium text-white tracking-wide"></h4>
+      <p id="lightbox-caption-note" class="text-xs sm:text-sm text-white/70 leading-relaxed"></p>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: URL IMAGE INPUT / REPLACE ==================== -->
+  <div id="url-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[var(--bg-primary)] hairline-all rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 id="url-modal-title" class="text-base font-semibold">输入或粘贴网络图片链接 (Image URL)</h3>
+        <button onclick="closeUrlModal()" class="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">✕</button>
+      </div>
+      <div class="space-y-3">
+        <label class="block text-xs text-[var(--text-secondary)]">支持小红书/Pinterest/ArchDaily/Unsplash/公司图库直链：</label>
+        <input id="url-modal-input" type="url" placeholder="https://images.unsplash.com/..." class="w-full px-3.5 py-2.5 rounded-lg text-sm hairline-all bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-600">
+        <div id="url-modal-extra-fields" class="space-y-3 hidden">
+          <input id="url-modal-node-title" type="text" placeholder="节点/部位名称（如：入口挑檐石材交接）" class="w-full px-3.5 py-2 rounded-lg text-sm hairline-all bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-600">
+          <textarea id="url-modal-node-note" rows="2" placeholder="意向说明（如：采用20mm厚酸洗洞石，底部内退暗藏2700K洗墙灯带）" class="w-full px-3.5 py-2 rounded-lg text-sm hairline-all bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeUrlModal()" class="px-4 py-2 rounded-lg text-xs font-medium hairline-all hover:bg-black/5 dark:hover:bg-white/5">取消</button>
+        <button onclick="confirmUrlModal()" class="px-4 py-2 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700">确认应用</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ADD NEW PROJECT ==================== -->
+  <div id="new-project-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[var(--bg-primary)] hairline-all rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-semibold">新增空间意向项目 (Add Reference Project)</h3>
+        <button onclick="closeNewProjectModal()" class="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">✕</button>
+      </div>
+      <div class="space-y-3.5 text-sm">
+        <div>
+          <label class="block text-xs text-[var(--text-secondary)] mb-1">项目/分区名称 *</label>
+          <input id="new-proj-title" type="text" placeholder="例如：前场水院与连廊灰空间意向" class="w-full px-3.5 py-2 rounded-lg hairline-all bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-600">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-[var(--text-secondary)] mb-1">英文副标题 / 编号</label>
+            <input id="new-proj-subtitle" type="text" placeholder="COURTYARD &amp; PAVILION" class="w-full px-3.5 py-2 rounded-lg hairline-all bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+          <div>
+            <label class="block text-xs text-[var(--text-secondary)] mb-1">所属分类标签 *</label>
+            <input id="new-proj-category" type="text" placeholder="例如：会所展厅 / 材质细部 / 建筑立面" class="w-full px-3.5 py-2 rounded-lg hairline-all bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs text-[var(--text-secondary)] mb-1">参考风格 / 对标案例来源</label>
+          <input id="new-proj-location" type="text" placeholder="例如：Vincent Van Duysen / Kyoto Aman" class="w-full px-3.5 py-2 rounded-lg hairline-all bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-600">
+        </div>
+        <div>
+          <label class="block text-xs text-[var(--text-secondary)] mb-1">核心设计说明</label>
+          <textarea id="new-proj-desc" rows="3" placeholder="简述该分区的空间尺度、核心材质与灯光氛围考量..." class="w-full px-3.5 py-2 rounded-lg hairline-all bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs text-[var(--text-secondary)] mb-1">上传封面意向图（可选，也可创建后批量上传）</label>
+          <input id="new-proj-cover-file" type="file" accept="image/*" class="text-xs text-[var(--text-secondary)]">
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeNewProjectModal()" class="px-4 py-2 rounded-lg text-xs font-medium hairline-all">取消</button>
+        <button onclick="createNewProject()" class="px-4 py-2 rounded-lg text-xs font-medium bg-blue-600 text-white hover:bg-blue-700">创建并进入项目</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: EXPORT & PUBLISH FOR BOSS ==================== -->
+  <div id="export-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-[var(--bg-primary)] hairline-all rounded-2xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <span class="text-[11px] font-mono uppercase tracking-widest text-blue-600 dark:text-blue-400">PUBLISH &amp; SHARE ANYWHERE</span>
+          <h3 class="text-lg font-semibold mt-1">导出独立网页 / 发布给领导跨设备浏览</h3>
+        </div>
+        <button onclick="closeExportModal()" class="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1">✕</button>
+      </div>
+
+      <p class="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
+        您当前修改的所有文字、项目分类以及上传的本地高清意向图，都可以一键打包成<strong>单个独立的 HTML 网页文件</strong>。
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Option 1: Presentation Mode for Boss -->
+        <div class="p-4 rounded-xl hairline-all bg-black/[0.02] dark:bg-white/[0.02] flex flex-col justify-between space-y-4">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold">1. 领导审阅纯净版 (.html)</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">推荐发给领导</span>
+            </div>
+            <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+              隐藏顶部「编辑内容」按钮，打开即为纯净的 1:1 极简画廊网站，领导在手机、iPad 或电脑上均可流畅点击看图与翻页。
+            </p>
+          </div>
+          <button onclick="exportStandaloneHTML(true)" class="w-full py-2.5 px-4 rounded-lg bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 text-xs font-medium hover:opacity-90 transition">
+            下载「领导汇报纯净版」网页
+          </button>
+        </div>
+
+        <!-- Option 2: Editable Version -->
+        <div class="p-4 rounded-xl hairline-all bg-black/[0.02] dark:bg-white/[0.02] flex flex-col justify-between space-y-4">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold">2. 可继续编辑版 (.html)</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">团队协作</span>
+            </div>
+            <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+              保留所有编辑与上传功能，方便您发给其他设计师同事继续增删意向图，或换一台电脑继续编辑。
+            </p>
+          </div>
+          <button onclick="exportStandaloneHTML(false)" class="w-full py-2.5 px-4 rounded-lg hairline-all hover:bg-black/5 dark:hover:bg-white/5 text-xs font-medium transition">
+            下载「可继续编辑版」网页
+          </button>
+        </div>
+      </div>
+
+      <!-- Free Public URL Hosting Tip -->
+      <div class="p-4 rounded-xl bg-blue-500/[0.06] border border-blue-500/20 space-y-2 text-xs">
+        <div class="font-semibold text-blue-700 dark:text-blue-300">💡 如何生成公开网址链接（发微信/飞书直接点开）？</div>
+        <ol class="list-decimal list-inside space-y-1 text-[var(--text-secondary)] leading-relaxed">
+          <li>点击上方按钮下载 <strong>领导汇报纯净版 (`index.html`)</strong>；</li>
+          <li>打开免费静态托管平台（如 <a href="https://app.netlify.com/drop" target="_blank" rel="noopener" class="underline text-blue-600 dark:text-blue-400">Netlify Drop</a> 或 <a href="https://pages.edgeone.ai/drop" target="_blank" rel="noopener" class="underline text-blue-600 dark:text-blue-400">腾讯云 EdgeOne Drop</a>）；</li>
+          <li>将下载的 `.html` 文件拖入网页框内，<strong>3秒钟即可生成全球任何手机/iPad都能直接打开的公开网址</strong>！</li>
+        </ol>
+      </div>
+
+      <!-- JSON Data Backup / Restore -->
+      <div class="pt-3 hairline-t flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span class="text-[var(--text-secondary)]">工程数据包备份 (.json)：</span>
+        <div class="flex items-center gap-2">
+          <button onclick="exportJsonBackup()" class="px-3 py-1.5 rounded-lg hairline-all hover:bg-black/5 dark:hover:bg-white/5">导出 JSON 备份</button>
+          <label class="cursor-pointer px-3 py-1.5 rounded-lg hairline-all hover:bg-black/5 dark:hover:bg-white/5">
+            <span>导入 JSON 备份</span>
+            <input type="file" accept=".json" class="hidden" onchange="importJsonBackup(event)">
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CUSTOM CONFIRMATION DIALOG ==================== -->
+  <div id="confirm-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[var(--bg-primary)] hairline-all rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <h3 id="confirm-modal-title" class="text-sm font-semibold">确认操作</h3>
+      <p id="confirm-modal-desc" class="text-xs text-[var(--text-secondary)] leading-relaxed"></p>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeConfirmModal()" class="px-3.5 py-1.5 rounded-lg text-xs hairline-all">取消</button>
+        <button id="confirm-modal-ok-btn" class="px-3.5 py-1.5 rounded-lg text-xs bg-red-600 text-white hover:bg-red-700">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Single-Image File Input for quick image replacement -->
+  <input type="file" id="single-image-file-input" accept="image/*" class="hidden" onchange="handleSingleImageFileSelected(event)">
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden px-4 py-2.5 rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 text-xs font-medium shadow-xl transition-all"></div>
+
+  <!-- ==================== APPLICATION STATE & ENGINE ==================== -->
+  <script id="embedded-initial-state">
+window.__EXPORTED_PRESENTATION_ONLY__ = true;
+window.__PRELOADED_PORTFOLIO_DATA__ = {"siteMeta":{"brand":"THEO / ARCHIVE","subtitle":"SPATIAL & MATERIAL DIRECTION — 空间意向档案","heroKicker":"SELECTED REFERENCE ARCHIVE — 点击任意图片进入项目细部图集","heroHeadline":"空间叙事、材质交接与光影尺度意向库","infoTitle":"2026 第三季度空间氛围与材质细部意向提案","infoDesc":"本档案汇集了近期针对项目前场灰空间、核心接待展厅、定制家具收口及建筑立面光影的参考意向。点击任一项目封面即可进入内部查看多角度细部节点分析与材质搭配建议。","infoDirections":"1. 降低高饱和装饰，采用天然洞石、深色烟熏橡木与手工肌理涂料构建静谧基调；\n2. 强调「克制的结构感」，在体块交接处预留 8-12mm 工艺留缝与洗墙暗藏灯槽；\n3. 家具选型偏向低重心、建筑感廓形，与硬装体块融为一体。","infoAuthor":"设计师助理 / 方案组","infoReviewer":"设计总监 / 主创团队","infoDate":"2026.11","footerText":"THEO / ARCHIVE — 建筑与室内空间意向汇报系统"},"settings":{"homeLayout":"grid","detailLayout":"two-col","theme":"light"},"projects":[{"id":"proj-01","title":"前场落客区与连廊灰空间","subtitle":"ARRIVAL COURTYARD & THRESHOLD","category":"会所展厅 Pavilion","location":"Ref: Aman Kyoto / Kengo Kuma","scale":"挑高 4.2m / 檐口外挑 2.8m","material":"深灰乱纹不锈钢、酸洗玄武岩、碳化木格栅","lighting":"2700K 地面洗墙暗槽 + 顶部防眩点光源","tags":["灰空间过渡","压低檐口","静水面反射","石材肌理"],"description":"前场不追求高耸张扬的门头，而是通过刻意压低的水平挑檐将视线引导至地面静水池与远端庭院苔藓景观。建筑体块交接处采用深灰乱纹不锈钢包边，消解厚重石材的体量感，营造由喧嚣城市步入静谧内院的情绪转换。","coverImage":"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85","images":[{"id":"img-101","url":"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85","title":"水平挑檐与静水面比例关系","note":"挑檐下沿控制在 2.65m 亲人尺度，水面采用黑色火烧面花岗岩铺底，形成完整的建筑倒影。"},{"id":"img-102","url":"https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=85","title":"连廊侧墙洞石分缝与漫反射采光","note":"墙面采用 900×450mm 罗马洞石工字错缝干挂，顶部预留 180mm 天光缝隙引入自然侧光。"},{"id":"img-103","url":"https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=85","title":"入口转角框景与框线收口细部","note":"无框超白玻嵌入地面与顶面 15mm U型不锈钢槽内，最大化室内外景观渗透。"},{"id":"img-104","url":"https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=85","title":"夜间洗墙灯光与汀步引导","note":"取消传统高杆庭院灯，所有照明隐藏于挑檐与汀步侧下沿，见光不见灯。"},{"id":"img-105","url":"https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=85","title":"入户厚重木门与黄铜拉手尺度","note":"整板 85mm 厚烟熏橡木枢轴门（Pivot Door），搭配定制做旧铸铜竖向长拉手。"}]},{"id":"proj-02","title":"极简零售展陈与中岛体块","subtitle":"MONOLITHIC GALLERY & RETAIL","category":"商业空间 Commercial","location":"Ref: Aesop / Studio Mumbai","scale":"层高 3.8m / 核心岛台 4.2m × 1.4m","material":"手工微水泥、拉丝不锈钢、天然莱姆石","lighting":"3000K 高显指博物馆级轨道射灯 (Ra≥97)","tags":["雕塑感岛台","冷暖材质对比","阵列展架","留白叙事"],"description":"空间以单一低饱和度矿物微水泥包裹天地墙，将视觉重心完全交还给空间中央的巨型体块岛台。拉丝不锈钢的冷冽工业感与天然莱姆石的温润气孔形成戏剧性触觉张力，适合作为核心展陈区或品牌沙龙接待区。","coverImage":"https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=85","images":[{"id":"img-201","url":"https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=85","title":"主展厅体块构成与轴线对称感","note":"中轴对称式布局强化仪式感，地面与墙面采用同色号暖灰微水泥无缝衔接。"},{"id":"img-202","url":"https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=85","title":"悬挑金属层板与墙面嵌入式节点","note":"5mm 厚实心喷砂不锈钢折板直接由墙体内部钢架挑出，表面无任何可见螺钉。"},{"id":"img-203","url":"https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1600&q=85","title":"单椅休憩区与柔和漫射软膜天花","note":"局部吊顶采用杜邦透光膜模拟自然天光，消除大面积硬质材料带来的冰冷感。"},{"id":"img-204","url":"https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=85","title":"石材洗手台体块穿插节点","note":"整块荒料切削成型的悬挑洗手池，隐蔽式下水缝宽控制在 12mm。"}]},{"id":"proj-03","title":"原木、洞石与金属交接细部","subtitle":"MATERIAL JUNCTIONS & TACTILITY","category":"材质细部 Materiality","location":"Ref: Vincent Van Duysen / Axel Vervoordt","scale":"细部节点 1:1 / 工艺留缝 8mm","material":"烟熏尤加利木、银灰洞石、古铜拉丝不锈钢","lighting":"2700K 极窄线性灯带勾勒体块边界","tags":["8mm工艺缝","异材质收口","天然开口洞石","触感美学"],"description":"汇总本案硬装施工图阶段最关键的异材质交接意向。摒弃传统的凸出踢脚线与金属扣条，所有木饰面与石材、艺术涂料交接处均采用『内退式底槽』或『不等厚咬合』手法，体现克制而考究的精工品质。","coverImage":"https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1600&q=85","images":[{"id":"img-301","url":"https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1600&q=85","title":"深色木饰面与天然洞石岛台咬合","note":"洞石保留自然孔洞不补胶（哑光面防护处理），台面出挑 45mm 并在内侧倒 45° 斜角减薄视觉厚度。"},{"id":"img-302","url":"https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=85","title":"墙地交接内退式暗踢脚节点","note":"墙面木饰面悬空离地 12mm，内部打底黑色哑光烤漆铝型材，形成悬浮阴影线。"},{"id":"img-303","url":"https://images.unsplash.com/photo-1615873968403-89e068629265?auto=format&fit=crop&w=1600&q=85","title":"通高隐形门与墙面分缝对齐关系","note":"一门到顶无门套设计，门扇竖向分缝与两侧木饰面模数严格等分（600mm 模数）。"},{"id":"img-304","url":"https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=1600&q=85","title":"亚麻织物软包吸音背景墙肌理","note":"在硬质石材空间中穿插高支粗纺比利时亚麻硬包，改善混响时间并增加温润度。"}]},{"id":"proj-04","title":"私宴茶室与沉降式会客区","subtitle":"SUNKEN LOUNGE & TEA PAVILION","category":"餐饮空间 Hospitality","location":"Ref: Norm Architects / Copenhagen & Tokyo","scale":"下沉深度 450mm / 围合面宽 6.8m","material":"小口手工砖、胡桃木实木、和纸透光屏风","lighting":"2400K 低位烛光感氛围照明 + 桌面重点聚光","tags":["沉降式围合","东方侘寂","和纸光影","低重心家具"],"description":"针对VIP接待与私宴茶歇空间，通过地面下沉 450mm 形成具有包裹感的围合场域。坐姿视点降低后，人的视线恰好与窗外水景及地被植物齐平。透光和纸推拉障子门既保证了私密性，又将直射阳光转化为柔和的漫射光斑。","coverImage":"https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1600&q=85","images":[{"id":"img-401","url":"https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1600&q=85","title":"下沉式围合沙发与低重心胡桃木茶几","note":"沙发靠背与下沉踏步平齐，保持整个空间水平视线的绝对通透。"},{"id":"img-402","url":"https://images.unsplash.com/photo-1616137466211-f939a420be84?auto=format&fit=crop&w=1600&q=85","title":"定制整板原木长桌与藤编餐椅搭配","note":"3.6米北美黑胡桃自然边长桌，搭配轻盈的黑色曲木藤编扶手椅。"},{"id":"img-403","url":"https://images.unsplash.com/photo-1540518614846-7ede433c457?auto=format&fit=crop&w=1600&q=85","title":"手工肌理壁龛与器皿陈列打光","note":"壁龛背板采用深炭灰烧杉木肌理，顶部单颗 8° 极窄光束角射灯精准打亮陶艺器皿。"},{"id":"img-404","url":"https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=85","title":"静谧水吧台与暗藏式酒柜收纳","note":"平时合上折叠口袋门即为完整的木饰面墙体，开启后呈现石材操作台与恒温酒柜。"}]},{"id":"proj-05","title":"建筑立面格栅与天光光影构造","subtitle":"FACADE LOUVERS & CHIAROSCURO","category":"建筑立面 Facade","location":"Ref: Peter Zumthor / Tadao Ando","scale":"立面模数 120mm / 挑空高度 9.6m","material":"清水混凝土、阳极氧化铝格栅、超白LOW-E玻璃","lighting":"自然光随时间推移的节律性投影","tags":["光影切片","垂直格栅","清水混凝土","戏剧性天光"],"description":"外立面改造与中庭挑空区着重探索『光作为建筑材料』的可能性。通过深宽比 3:1 的竖向阳极氧化铝百叶，将强烈的西晒直射光过滤为富有韵律感的线性光影，并在下午三点至五点之间在室内清水混凝土墙面上投射出缓慢移动的几何光斑。","coverImage":"https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=85","images":[{"id":"img-501","url":"https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=85","title":"挑空走廊侧窗光影切割效果","note":"深凹窗套设计（深度 450mm）有效避免眩光，同时在地面形成清晰的光影边界。"},{"id":"img-502","url":"https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=85","title":"建筑外立面竖向金属格栅疏密渐变","note":"根据室内功能私密性需求，格栅间距由公共区的 300mm 渐变加密至设备区的 100mm。"},{"id":"img-503","url":"https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=85","title":"旋转楼梯体块与顶部圆形天窗","note":"现浇旋转楼梯脱离四周墙体独立承重，顶部自然天光垂直倾泻而下。"},{"id":"img-504","url":"https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=85","title":"傍晚蓝调时刻（Blue Hour）立面内透光感","note":"室内 2700K 暖光透过双层超白玻与外部冷调夜空形成高级的冷暖反差。"}]},{"id":"proj-06","title":"艺术家具、灯具与软装陈设选型","subtitle":"COLLECTIBLE FURNITURE & OBJECTS","category":"软装陈设 FF&E","location":"Ref: Pierre Jeanneret / Apparatus Studio","scale":"核心家具单品 & 艺术陈设清单","material":"马鞍皮、铸造黄铜、天然麻石、粗陶","lighting":"装饰壁灯与落地灯构建中低位视觉焦点","tags":["中古经典","建筑感廓形","手工粗陶","低饱和软装"],"description":"软装选型拒绝堆砌浮华饰品，以『少而精的收藏级设计单品』锚定空间气质。主沙发采用低矮宽厚的模块式亚麻绒布造型，搭配极富雕塑感的中古藤编单椅与手工铸铜吊灯，让每一件家具都成为空间中的独立建筑微缩体。","coverImage":"https://images.unsplash.com/photo-1567016432779-094069958ea5?auto=format&fit=crop&w=1600&q=85","images":[{"id":"img-601","url":"https://images.unsplash.com/photo-1567016432779-094069958ea5?auto=format&fit=crop&w=1600&q=85","title":"模块化低重心亚麻主沙发与石灰岩边几","note":"面料选用重磅粗纹理棉麻混纺，座深 1050mm 提供极佳的松弛感。"},{"id":"img-602","url":"https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=1600&q=85","title":"雕塑感原木单椅与几何构成","note":"置于转角留白处作为视觉端景，兼具功能性与艺术雕塑属性。"},{"id":"img-603","url":"https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=1600&q=85","title":"手工吹制磨砂玻璃与黄铜吊灯","note":"柔和的球形漫射光源悬垂于餐桌上方 750mm 处，凝聚用餐交谈氛围。"},{"id":"img-604","url":"https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=1600&q=85","title":"侘寂感手作粗陶花器与枯枝造景","note":"器皿表面保留自然窑变釉面与拉坯手痕，插花以单一姿态感枝条为主。"}]}]};
+</script>
+
+  <script>
+    /*************************************************************************
+     * 1. DEFAULT CURATED ARCHITECTURAL & INTERIOR REFERENCE DATA
+     *    6 complete spatial moodboard projects with sub-images & annotations
+     *************************************************************************/
+    const DEFAULT_PORTFOLIO_DATA = {
+      siteMeta: {
+        brand: "THEO / ARCHIVE",
+        subtitle: "SPATIAL & MATERIAL DIRECTION — 空间意向档案",
+        heroKicker: "SELECTED REFERENCE ARCHIVE — 点击任意图片进入项目细部图集",
+        heroHeadline: "空间叙事、材质交接与光影尺度意向库",
+        infoTitle: "2026 第三季度空间氛围与材质细部意向提案",
+        infoDesc: "本档案汇集了近期针对项目前场灰空间、核心接待展厅、定制家具收口及建筑立面光影的参考意向。点击任一项目封面即可进入内部查看多角度细部节点分析与材质搭配建议。",
+        infoDirections: "1. 降低高饱和装饰，采用天然洞石、深色烟熏橡木与手工肌理涂料构建静谧基调；\n2. 强调「克制的结构感」，在体块交接处预留 8-12mm 工艺留缝与洗墙暗藏灯槽；\n3. 家具选型偏向低重心、建筑感廓形，与硬装体块融为一体。",
+        infoAuthor: "设计师助理 / 方案组",
+        infoReviewer: "设计总监 / 主创团队",
+        infoDate: "2026.11",
+        footerText: "THEO / ARCHIVE — 建筑与室内空间意向汇报系统"
+      },
+      settings: {
+        homeLayout: "grid",        // 'grid' | 'editorial' | 'index'
+        detailLayout: "two-col",   // 'two-col' | 'full' | 'compact'
+        theme: "light"             // 'light' | 'dark'
+      },
+      projects: [
+        {
+          id: "proj-01",
+          title: "前场落客区与连廊灰空间",
+          subtitle: "ARRIVAL COURTYARD & THRESHOLD",
+          category: "会所展厅 Pavilion",
+          location: "Ref: Aman Kyoto / Kengo Kuma",
+          scale: "挑高 4.2m / 檐口外挑 2.8m",
+          material: "深灰乱纹不锈钢、酸洗玄武岩、碳化木格栅",
+          lighting: "2700K 地面洗墙暗槽 + 顶部防眩点光源",
+          tags: ["灰空间过渡", "压低檐口", "静水面反射", "石材肌理"],
+          description: "前场不追求高耸张扬的门头，而是通过刻意压低的水平挑檐将视线引导至地面静水池与远端庭院苔藓景观。建筑体块交接处采用深灰乱纹不锈钢包边，消解厚重石材的体量感，营造由喧嚣城市步入静谧内院的情绪转换。",
+          coverImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85",
+          images: [
+            {
+              id: "img-101",
+              url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85",
+              title: "水平挑檐与静水面比例关系",
+              note: "挑檐下沿控制在 2.65m 亲人尺度，水面采用黑色火烧面花岗岩铺底，形成完整的建筑倒影。"
+            },
+            {
+              id: "img-102",
+              url: "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=85",
+              title: "连廊侧墙洞石分缝与漫反射采光",
+              note: "墙面采用 900×450mm 罗马洞石工字错缝干挂，顶部预留 180mm 天光缝隙引入自然侧光。"
+            },
+            {
+              id: "img-103",
+              url: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=85",
+              title: "入口转角框景与框线收口细部",
+              note: "无框超白玻嵌入地面与顶面 15mm U型不锈钢槽内，最大化室内外景观渗透。"
+            },
+            {
+              id: "img-104",
+              url: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=85",
+              title: "夜间洗墙灯光与汀步引导",
+              note: "取消传统高杆庭院灯，所有照明隐藏于挑檐与汀步侧下沿，见光不见灯。"
+            },
+            {
+              id: "img-105",
+              url: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=85",
+              title: "入户厚重木门与黄铜拉手尺度",
+              note: "整板 85mm 厚烟熏橡木枢轴门（Pivot Door），搭配定制做旧铸铜竖向长拉手。"
+            }
+          ]
+        },
+        {
+          id: "proj-02",
+          title: "极简零售展陈与中岛体块",
+          subtitle: "MONOLITHIC GALLERY & RETAIL",
+          category: "商业空间 Commercial",
+          location: "Ref: Aesop / Studio Mumbai",
+          scale: "层高 3.8m / 核心岛台 4.2m × 1.4m",
+          material: "手工微水泥、拉丝不锈钢、天然莱姆石",
+          lighting: "3000K 高显指博物馆级轨道射灯 (Ra≥97)",
+          tags: ["雕塑感岛台", "冷暖材质对比", "阵列展架", "留白叙事"],
+          description: "空间以单一低饱和度矿物微水泥包裹天地墙，将视觉重心完全交还给空间中央的巨型体块岛台。拉丝不锈钢的冷冽工业感与天然莱姆石的温润气孔形成戏剧性触觉张力，适合作为核心展陈区或品牌沙龙接待区。",
+          coverImage: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=85",
+          images: [
+            {
+              id: "img-201",
+              url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1600&q=85",
+              title: "主展厅体块构成与轴线对称感",
+              note: "中轴对称式布局强化仪式感，地面与墙面采用同色号暖灰微水泥无缝衔接。"
+            },
+            {
+              id: "img-202",
+              url: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1600&q=85",
+              title: "悬挑金属层板与墙面嵌入式节点",
+              note: "5mm 厚实心喷砂不锈钢折板直接由墙体内部钢架挑出，表面无任何可见螺钉。"
+            },
+            {
+              id: "img-203",
+              url: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=1600&q=85",
+              title: "单椅休憩区与柔和漫射软膜天花",
+              note: "局部吊顶采用杜邦透光膜模拟自然天光，消除大面积硬质材料带来的冰冷感。"
+            },
+            {
+              id: "img-204",
+              url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1600&q=85",
+              title: "石材洗手台体块穿插节点",
+              note: "整块荒料切削成型的悬挑洗手池，隐蔽式下水缝宽控制在 12mm。"
+            }
+          ]
+        },
+        {
+          id: "proj-03",
+          title: "原木、洞石与金属交接细部",
+          subtitle: "MATERIAL JUNCTIONS & TACTILITY",
+          category: "材质细部 Materiality",
+          location: "Ref: Vincent Van Duysen / Axel Vervoordt",
+          scale: "细部节点 1:1 / 工艺留缝 8mm",
+          material: "烟熏尤加利木、银灰洞石、古铜拉丝不锈钢",
+          lighting: "2700K 极窄线性灯带勾勒体块边界",
+          tags: ["8mm工艺缝", "异材质收口", "天然开口洞石", "触感美学"],
+          description: "汇总本案硬装施工图阶段最关键的异材质交接意向。摒弃传统的凸出踢脚线与金属扣条，所有木饰面与石材、艺术涂料交接处均采用『内退式底槽』或『不等厚咬合』手法，体现克制而考究的精工品质。",
+          coverImage: "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1600&q=85",
+          images: [
+            {
+              id: "img-301",
+              url: "https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1600&q=85",
+              title: "深色木饰面与天然洞石岛台咬合",
+              note: "洞石保留自然孔洞不补胶（哑光面防护处理），台面出挑 45mm 并在内侧倒 45° 斜角减薄视觉厚度。"
+            },
+            {
+              id: "img-302",
+              url: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=85",
+              title: "墙地交接内退式暗踢脚节点",
+              note: "墙面木饰面悬空离地 12mm，内部打底黑色哑光烤漆铝型材，形成悬浮阴影线。"
+            },
+            {
+              id: "img-303",
+              url: "https://images.unsplash.com/photo-1615873968403-89e068629265?auto=format&fit=crop&w=1600&q=85",
+              title: "通高隐形门与墙面分缝对齐关系",
+              note: "一门到顶无门套设计，门扇竖向分缝与两侧木饰面模数严格等分（600mm 模数）。"
+            },
+            {
+              id: "img-304",
+              url: "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=1600&q=85",
+              title: "亚麻织物软包吸音背景墙肌理",
+              note: "在硬质石材空间中穿插高支粗纺比利时亚麻硬包，改善混响时间并增加温润度。"
+            }
+          ]
+        },
+        {
+          id: "proj-04",
+          title: "私宴茶室与沉降式会客区",
+          subtitle: "SUNKEN LOUNGE & TEA PAVILION",
+          category: "餐饮空间 Hospitality",
+          location: "Ref: Norm Architects / Copenhagen & Tokyo",
+          scale: "下沉深度 450mm / 围合面宽 6.8m",
+          material: "小口手工砖、胡桃木实木、和纸透光屏风",
+          lighting: "2400K 低位烛光感氛围照明 + 桌面重点聚光",
+          tags: ["沉降式围合", "东方侘寂", "和纸光影", "低重心家具"],
+          description: "针对VIP接待与私宴茶歇空间，通过地面下沉 450mm 形成具有包裹感的围合场域。坐姿视点降低后，人的视线恰好与窗外水景及地被植物齐平。透光和纸推拉障子门既保证了私密性，又将直射阳光转化为柔和的漫射光斑。",
+          coverImage: "https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1600&q=85",
+          images: [
+            {
+              id: "img-401",
+              url: "https://images.unsplash.com/photo-1600210491892-03d54c0aaf87?auto=format&fit=crop&w=1600&q=85",
+              title: "下沉式围合沙发与低重心胡桃木茶几",
+              note: "沙发靠背与下沉踏步平齐，保持整个空间水平视线的绝对通透。"
+            },
+            {
+              id: "img-402",
+              url: "https://images.unsplash.com/photo-1616137466211-f939a420be84?auto=format&fit=crop&w=1600&q=85",
+              title: "定制整板原木长桌与藤编餐椅搭配",
+              note: "3.6米北美黑胡桃自然边长桌，搭配轻盈的黑色曲木藤编扶手椅。"
+            },
+            {
+              id: "img-403",
+              url: "https://images.unsplash.com/photo-1540518614846-7ede433c457?auto=format&fit=crop&w=1600&q=85",
+              title: "手工肌理壁龛与器皿陈列打光",
+              note: "壁龛背板采用深炭灰烧杉木肌理，顶部单颗 8° 极窄光束角射灯精准打亮陶艺器皿。"
+            },
+            {
+              id: "img-404",
+              url: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=85",
+              title: "静谧水吧台与暗藏式酒柜收纳",
+              note: "平时合上折叠口袋门即为完整的木饰面墙体，开启后呈现石材操作台与恒温酒柜。"
+            }
+          ]
+        },
+        {
+          id: "proj-05",
+          title: "建筑立面格栅与天光光影构造",
+          subtitle: "FACADE LOUVERS & CHIAROSCURO",
+          category: "建筑立面 Facade",
+          location: "Ref: Peter Zumthor / Tadao Ando",
+          scale: "立面模数 120mm / 挑空高度 9.6m",
+          material: "清水混凝土、阳极氧化铝格栅、超白LOW-E玻璃",
+          lighting: "自然光随时间推移的节律性投影",
+          tags: ["光影切片", "垂直格栅", "清水混凝土", "戏剧性天光"],
+          description: "外立面改造与中庭挑空区着重探索『光作为建筑材料』的可能性。通过深宽比 3:1 的竖向阳极氧化铝百叶，将强烈的西晒直射光过滤为富有韵律感的线性光影，并在下午三点至五点之间在室内清水混凝土墙面上投射出缓慢移动的几何光斑。",
+          coverImage: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=85",
+          images: [
+            {
+              id: "img-501",
+              url: "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1600&q=85",
+              title: "挑空走廊侧窗光影切割效果",
+              note: "深凹窗套设计（深度 450mm）有效避免眩光，同时在地面形成清晰的光影边界。"
+            },
+            {
+              id: "img-502",
+              url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=85",
+              title: "建筑外立面竖向金属格栅疏密渐变",
+              note: "根据室内功能私密性需求，格栅间距由公共区的 300mm 渐变加密至设备区的 100mm。"
+            },
+            {
+              id: "img-503",
+              url: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1600&q=85",
+              title: "旋转楼梯体块与顶部圆形天窗",
+              note: "现浇旋转楼梯脱离四周墙体独立承重，顶部自然天光垂直倾泻而下。"
+            },
+            {
+              id: "img-504",
+              url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=85",
+              title: "傍晚蓝调时刻（Blue Hour）立面内透光感",
+              note: "室内 2700K 暖光透过双层超白玻与外部冷调夜空形成高级的冷暖反差。"
+            }
+          ]
+        },
+        {
+          id: "proj-06",
+          title: "艺术家具、灯具与软装陈设选型",
+          subtitle: "COLLECTIBLE FURNITURE & OBJECTS",
+          category: "软装陈设 FF&E",
+          location: "Ref: Pierre Jeanneret / Apparatus Studio",
+          scale: "核心家具单品 & 艺术陈设清单",
+          material: "马鞍皮、铸造黄铜、天然麻石、粗陶",
+          lighting: "装饰壁灯与落地灯构建中低位视觉焦点",
+          tags: ["中古经典", "建筑感廓形", "手工粗陶", "低饱和软装"],
+          description: "软装选型拒绝堆砌浮华饰品，以『少而精的收藏级设计单品』锚定空间气质。主沙发采用低矮宽厚的模块式亚麻绒布造型，搭配极富雕塑感的中古藤编单椅与手工铸铜吊灯，让每一件家具都成为空间中的独立建筑微缩体。",
+          coverImage: "https://images.unsplash.com/photo-1567016432779-094069958ea5?auto=format&fit=crop&w=1600&q=85",
+          images: [
+            {
+              id: "img-601",
+              url: "https://images.unsplash.com/photo-1567016432779-094069958ea5?auto=format&fit=crop&w=1600&q=85",
+              title: "模块化低重心亚麻主沙发与石灰岩边几",
+              note: "面料选用重磅粗纹理棉麻混纺，座深 1050mm 提供极佳的松弛感。"
+            },
+            {
+              id: "img-602",
+              url: "https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=1600&q=85",
+              title: "雕塑感原木单椅与几何构成",
+              note: "置于转角留白处作为视觉端景，兼具功能性与艺术雕塑属性。"
+            },
+            {
+              id: "img-603",
+              url: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=1600&q=85",
+              title: "手工吹制磨砂玻璃与黄铜吊灯",
+              note: "柔和的球形漫射光源悬垂于餐桌上方 750mm 处，凝聚用餐交谈氛围。"
+            },
+            {
+              id: "img-604",
+              url: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?auto=format&fit=crop&w=1600&q=85",
+              title: "侘寂感手作粗陶花器与枯枝造景",
+              note: "器皿表面保留自然窑变釉面与拉坯手痕，插花以单一姿态感枝条为主。"
+            }
+          ]
+        }
+      ]
+    };
+
+    /*************************************************************************
+     * 2. APPLICATION STATE & INDEXEDDB PERSISTENCE
+     *************************************************************************/
+    let appData = JSON.parse(JSON.stringify(DEFAULT_PORTFOLIO_DATA));
+    let currentView = "home";       // 'home' | 'detail'
+    let currentProjectId = null;
+    let activeCategory = "ALL";
+    let isEditMode = false;
+    let isPresentationOnly = Boolean(window.__EXPORTED_PRESENTATION_ONLY__);
+
+    // Lightbox State
+    let lightboxImages = [];
+    let lightboxIndex = 0;
+    let lightboxZoomed = false;
+
+    // Image Replacement / URL Modal Context
+    let pendingImageAction = null; // { type: 'cover' | 'sub-replace' | 'sub-add', projId, imgIdx }
+
+    const DB_NAME = "TheoPortfolioMoodboardDB";
+    const DB_STORE = "portfolioState";
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(DB_STORE)) {
+            db.createObjectStore(DB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function saveState() {
+      try {
+        const db = await openDB();
+        const tx = db.transaction(DB_STORE, "readwrite");
+        tx.objectStore(DB_STORE).put(appData, "current");
+      } catch (err) {
+        console.warn("IndexedDB save fallback:", err);
+      }
+    }
+
+    async function loadState() {
+      // If exported with preloaded data embedded in the HTML, prioritize it first if IndexedDB is empty or if presentation-only
+      if (window.__PRELOADED_PORTFOLIO_DATA__) {
+        appData = JSON.parse(JSON.stringify(window.__PRELOADED_PORTFOLIO_DATA__));
+        if (isPresentationOnly) return;
+      }
+      try {
+        const db = await openDB();
+        const saved = await new Promise((resolve) => {
+          const tx = db.transaction(DB_STORE, "readonly");
+          const req = tx.objectStore(DB_STORE).get("current");
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => resolve(null);
+        });
+        if (saved && saved.projects && saved.projects.length > 0) {
+          appData = saved;
+        }
+      } catch (err) {
+        console.warn("IndexedDB load fallback:", err);
+      }
+    }
+
+    /*************************************************************************
+     * 3. CLIENT-SIDE IMAGE COMPRESSION (Offscreen Canvas -> Crisp WebP/JPEG)
+     *************************************************************************/
+    function compressImageFile(file, maxWidth = 1600, quality = 0.84) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL("image/jpeg", quality);
+            resolve(dataUrl);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    /*************************************************************************
+     * 4. INITIALIZATION & ROUTING (#home or #proj-id)
+     *************************************************************************/
+    window.addEventListener("DOMContentLoaded", async () => {
+      await loadState();
+
+      // Apply Presentation-Only lock if exported for Boss
+      if (isPresentationOnly) {
+        document.getElementById("authoring-controls").classList.add("hidden");
+      }
+
+      applyTheme(appData.settings?.theme || "light");
+      renderSiteMeta();
+      renderCategories();
+      handleHashRoute();
+
+      window.addEventListener("hashchange", handleHashRoute);
+
+      // Keyboard navigation for Lightbox & secret Shift+E edit unlock
+      window.addEventListener("keydown", (e) => {
+        const lb = document.getElementById("lightbox-modal");
+        if (!lb.classList.contains("hidden")) {
+          if (e.key === "Escape") closeLightbox();
+          if (e.key === "ArrowLeft") stepLightbox(-1);
+          if (e.key === "ArrowRight") stepLightbox(1);
+        }
+        // Secret shortcut Shift + E to unlock edit bar even in presentation mode
+        if (e.shiftKey && (e.key === "E" || e.key === "e") && !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) && !document.activeElement.isContentEditable) {
+          document.getElementById("authoring-controls").classList.remove("hidden");
+          toggleEditMode();
+        }
+      });
+    });
+
+    function handleHashRoute() {
+      const hash = window.location.hash.replace("#", "");
+      if (hash && hash !== "home") {
+        const targetProj = appData.projects.find((p) => p.id === hash);
+        if (targetProj) {
+          openProjectDetail(targetProj.id, false);
+          return;
+        }
+      }
+      showHomeView(false);
+    }
+
+    function handleLogoClick(e) {
+      e.preventDefault();
+      navigateHome();
+    }
+
+    function navigateHome() {
+      window.location.hash = "home";
+      showHomeView(true);
+    }
+
+    function showHomeView(scrollTop = true) {
+      currentView = "home";
+      currentProjectId = null;
+      document.getElementById("view-detail").classList.add("hidden");
+      document.getElementById("view-home").classList.remove("hidden");
+      document.getElementById("home-layout-switcher").classList.remove("hidden");
+      document.getElementById("header-category-nav").classList.remove("xl:hidden");
+      document.getElementById("mobile-category-bar").classList.remove("hidden");
+      renderHomePortfolio();
+      if (scrollTop) window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function openProjectDetail(projId, updateHash = true) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj) return;
+      currentView = "detail";
+      currentProjectId = projId;
+      if (updateHash) {
+        window.location.hash = projId;
+      }
+      document.getElementById("view-home").classList.add("hidden");
+      document.getElementById("index-hover-preview").classList.add("hidden");
+      document.getElementById("view-detail").classList.remove("hidden");
+      document.getElementById("home-layout-switcher").classList.add("hidden");
+      document.getElementById("mobile-category-bar").classList.add("hidden");
+
+      renderProjectDetail(projId);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function navigateAdjacentProject(direction) {
+      const idx = appData.projects.findIndex((p) => p.id === currentProjectId);
+      if (idx === -1) return;
+      const nextIdx = (idx + direction + appData.projects.length) % appData.projects.length;
+      openProjectDetail(appData.projects[nextIdx].id, true);
+    }
+
+    /*************************************************************************
+     * 5. RENDERING: SITE META, CATEGORIES & HOME GALLERY (Grid / Editorial / Index)
+     *************************************************************************/
+    function renderSiteMeta() {
+      const m = appData.siteMeta;
+      const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val || "";
+      };
+      setTxt("site-brand", m.brand);
+      setTxt("site-subtitle", m.subtitle);
+      setTxt("hero-kicker", m.heroKicker);
+      setTxt("hero-headline", m.heroHeadline);
+      setTxt("info-title", m.infoTitle);
+      setTxt("info-desc", m.infoDesc);
+      setTxt("info-directions", m.infoDirections);
+      setTxt("info-author", m.infoAuthor);
+      setTxt("info-reviewer", m.infoReviewer);
+      setTxt("info-date", m.infoDate);
+      setTxt("footer-copyright", m.footerText);
+
+      // Update contenteditable attribute on static meta elements
+      const editableIds = [
+        "site-brand", "site-subtitle", "hero-kicker", "hero-headline",
+        "info-title", "info-desc", "info-directions", "info-author",
+        "info-reviewer", "info-date", "footer-copyright"
+      ];
+      editableIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.contentEditable = isEditMode ? "true" : "false";
+      });
+    }
+
+    function updateSiteMeta(key, value) {
+      if (!isEditMode) return;
+      appData.siteMeta[key] = value.trim();
+      saveState();
+      showToast("已自动保存文本修改");
+    }
+
+    function renderCategories() {
+      const cats = ["ALL"];
+      appData.projects.forEach((p) => {
+        if (p.category && !cats.includes(p.category.trim())) {
+          cats.push(p.category.trim());
+        }
+      });
+
+      const buildPills = () =>
+        cats
+          .map((cat) => {
+            const isActive = activeCategory === cat;
+            const label = cat === "ALL" ? `全部 All (${appData.projects.length})` : cat;
+            return `<button onclick="filterByCategory('${escapeHtml(cat)}')"
+                      class="px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                        isActive
+                          ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5"
+                      }">
+                      ${escapeHtml(label)}
+                    </button>`;
+          })
+          .join("");
+
+      document.getElementById("header-category-nav").innerHTML = buildPills();
+      document.getElementById("mobile-category-bar").innerHTML = buildPills();
+    }
+
+    function filterByCategory(cat) {
+      activeCategory = cat;
+      renderCategories();
+      if (currentView !== "home") {
+        navigateHome();
+      } else {
+        renderHomePortfolio();
+      }
+    }
+
+    function setHomeLayout(layout) {
+      appData.settings.homeLayout = layout;
+      saveState();
+      renderHomePortfolio();
+    }
+
+    function renderHomePortfolio() {
+      const layout = appData.settings.homeLayout || "grid";
+      ["grid", "editorial", "index"].forEach((l) => {
+        const btn = document.getElementById(`layout-btn-${l}`);
+        if (btn) {
+          if (l === layout) {
+            btn.className = "px-2.5 py-1 rounded-md text-xs font-medium bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm transition-all";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all";
+          }
+        }
+      });
+
+      const filteredProjects =
+        activeCategory === "ALL"
+          ? appData.projects
+          : appData.projects.filter((p) => (p.category || "").trim() === activeCategory);
+
+      // Update total projects & images counter
+      const totalImgs = appData.projects.reduce((acc, p) => acc + (p.images ? p.images.length : 0), 0);
+      const pad2 = (n) => String(n).padStart(2, "0");
+      document.getElementById("project-count-indicator").innerText = `${pad2(filteredProjects.length)} PROJECTS / ${pad2(totalImgs)} REFERENCES`;
+
+      const container = document.getElementById("portfolio-container");
+
+      if (layout === "index") {
+        // SWISS TABULAR INDEX VIEW WITH HOVER IMAGE PREVIEW
+        container.innerHTML = `
+          <div class="divide-y divide-[var(--border-hairline)] hairline-t hairline-b">
+            <div class="grid grid-cols-12 gap-4 py-3 text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+              <div class="col-span-1">NO.</div>
+              <div class="col-span-5 sm:col-span-4">PROJECT / 空间意向主题</div>
+              <div class="col-span-3 hidden sm:block">CATEGORY / 分类</div>
+              <div class="col-span-4 sm:col-span-3">REFERENCE / 对标方向</div>
+              <div class="col-span-3 sm:col-span-1 text-right">PLATES</div>
+            </div>
+            ${filteredProjects
+              .map((proj, idx) => {
+                const realIdx = appData.projects.findIndex((p) => p.id === proj.id);
+                const num = pad2(realIdx + 1);
+                const imgCount = proj.images ? proj.images.length : 0;
+                return `
+                  <div class="group grid grid-cols-12 gap-4 py-5 items-center cursor-pointer hover:bg-black/[0.025] dark:hover:bg-white/[0.03] transition px-2 -mx-2 rounded-lg"
+                       onclick="handleCardClick(event, '${proj.id}')"
+                       onmouseenter="showIndexHoverPreview(event, '${escapeHtml(proj.coverImage)}')"
+                       onmousemove="moveIndexHoverPreview(event)"
+                       onmouseleave="hideIndexHoverPreview()">
+                    <div class="col-span-1 font-mono text-xs text-[var(--text-secondary)] tabular-nums">${num}</div>
+                    <div class="col-span-5 sm:col-span-4">
+                      <div class="text-sm sm:text-base font-medium group-hover:translate-x-1 transition-transform">${escapeHtml(proj.title)}</div>
+                      <div class="text-[11px] font-mono text-[var(--text-secondary)]">${escapeHtml(proj.subtitle || "")}</div>
+                    </div>
+                    <div class="col-span-3 hidden sm:block">
+                      <span class="px-2.5 py-0.5 rounded-full text-xs hairline-all text-[var(--text-secondary)]">${escapeHtml(proj.category)}</span>
+                    </div>
+                    <div class="col-span-4 sm:col-span-3 text-xs text-[var(--text-secondary)] truncate">${escapeHtml(proj.location || "")}</div>
+                    <div class="col-span-2 sm:col-span-1 text-right font-mono text-xs text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]">
+                      ${imgCount} 图 ↗
+                    </div>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        `;
+        return;
+      }
+
+      // GRID OR EDITORIAL GALLERY VIEW
+      const gridClass =
+        layout === "editorial"
+          ? "grid grid-cols-1 gap-16 sm:gap-24 max-w-5xl mx-auto"
+          : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-14 sm:gap-y-16";
+
+      const cardsHtml = filteredProjects
+        .map((proj) => {
+          const realIdx = appData.projects.findIndex((p) => p.id === proj.id);
+          const num = pad2(realIdx + 1);
+          const imgCount = proj.images ? proj.images.length : 0;
+          const aspectClass = layout === "editorial" ? "aspect-[16/10]" : "aspect-[4/3]";
+
+          return `
+            <article class="group flex flex-col space-y-3.5 animate-framer-in">
+              <!-- Image Container -->
+              <div class="framer-img-wrap ${aspectClass} w-full rounded-sm cursor-pointer hairline-all"
+                   onclick="handleCardClick(event, '${proj.id}')">
+                <img src="${escapeHtml(proj.coverImage)}"
+                     alt="${escapeHtml(proj.title)}"
+                     onerror="this.src='https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Image'"
+                     class="framer-img w-full h-full object-cover" />
+
+                <!-- Subtle Top-Right Image Count Badge -->
+                <div class="absolute top-3 right-3 px-2.5 py-1 rounded bg-black/60 backdrop-blur-md text-white font-mono text-[10px] tracking-wider uppercase flex items-center gap-1.5">
+                  <span>${imgCount} IMAGES</span>
+                  <span>↗</span>
+                </div>
+
+                <!-- Hover Prompt Overlay (When NOT in Edit Mode) -->
+                ${
+                  !isEditMode
+                    ? `<div class="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors flex items-end p-5 opacity-0 group-hover:opacity-100">
+                         <span class="px-3 py-1.5 rounded-full bg-white/95 text-neutral-900 text-xs font-medium shadow-lg translate-y-2 group-hover:translate-y-0 transition-transform">
+                           点击查看项目内 ${imgCount} 张细部意向图 →
+                         </span>
+                       </div>`
+                    : ""
+                }
+
+                <!-- Edit Mode Overlay Toolbar on Cover Card -->
+                ${
+                  isEditMode
+                    ? `<div class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/85 via-black/50 to-transparent flex flex-wrap items-center justify-between gap-1.5" onclick="event.stopPropagation()">
+                         <div class="flex items-center gap-1.5">
+                           <button onclick="triggerCoverFileUpload('${proj.id}')" class="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-medium shadow">
+                             上传替换封面
+                           </button>
+                           <button onclick="openCoverUrlModal('${proj.id}')" class="px-2.5 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-[11px] backdrop-blur-sm">
+                             图片链接
+                           </button>
+                           <button onclick="openProjectDetail('${proj.id}', true)" class="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-medium">
+                             进入编辑子图 (${imgCount})
+                           </button>
+                         </div>
+                         <div class="flex items-center gap-1">
+                           <button onclick="moveProject(${realIdx}, -1)" class="w-6 h-6 rounded bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center" title="前移">←</button>
+                           <button onclick="moveProject(${realIdx}, 1)" class="w-6 h-6 rounded bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center" title="后移">→</button>
+                           <button onclick="duplicateProject('${proj.id}')" class="px-2 h-6 rounded bg-white/20 hover:bg-white/30 text-white text-[11px]" title="复制项目">复制</button>
+                           <button onclick="deleteProjectConfirm('${proj.id}')" class="px-2 h-6 rounded bg-red-600/80 hover:bg-red-600 text-white text-[11px]" title="删除项目">删除</button>
+                         </div>
+                       </div>`
+                    : ""
+                }
+              </div>
+
+              <!-- Editorial Caption Bar (1:1 Theo Portfolio Typography) -->
+              <div class="pt-1 flex items-start justify-between gap-4">
+                <div class="flex items-baseline gap-3 min-w-0 flex-1">
+                  <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums shrink-0">${num}</span>
+                  <div class="min-w-0 flex-1 space-y-1">
+                    <div class="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <h3 class="text-base sm:text-lg font-medium tracking-[-0.01em] leading-snug cursor-pointer"
+                          contenteditable="${isEditMode}"
+                          onclick="if(!isEditMode) openProjectDetail('${proj.id}', true)"
+                          onblur="updateProjectField('${proj.id}', 'title', this.innerText)">${escapeHtml(proj.title)}</h3>
+                      <span class="text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]"
+                            contenteditable="${isEditMode}"
+                            onblur="updateProjectField('${proj.id}', 'subtitle', this.innerText)">${escapeHtml(proj.subtitle || "")}</span>
+                    </div>
+                    <p class="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed"
+                       contenteditable="${isEditMode}"
+                       onblur="updateProjectField('${proj.id}', 'description', this.innerText)">${escapeHtml(proj.description || "")}</p>
+                  </div>
+                </div>
+
+                <div class="text-right shrink-0 space-y-1">
+                  <span class="inline-block px-2.5 py-0.5 rounded-full text-[11px] hairline-all text-[var(--text-secondary)]"
+                        contenteditable="${isEditMode}"
+                        onblur="updateProjectField('${proj.id}', 'category', this.innerText)">${escapeHtml(proj.category)}</span>
+                  <div class="text-[11px] font-mono text-[var(--text-muted)]"
+                       contenteditable="${isEditMode}"
+                       onblur="updateProjectField('${proj.id}', 'location', this.innerText)">${escapeHtml(proj.location || "")}</div>
+                </div>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+
+      // Add New Project Card in Edit Mode
+      const addProjectCardHtml = isEditMode
+        ? `<div onclick="openNewProjectModal()"
+                class="aspect-[4/3] rounded-sm border-2 border-dashed border-blue-500/40 hover:border-blue-600 bg-blue-500/[0.02] hover:bg-blue-500/[0.05] transition flex flex-col items-center justify-center p-8 cursor-pointer text-center space-y-2">
+             <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-2xl font-light shadow-md">+</div>
+             <div class="text-sm font-semibold text-blue-600 dark:text-blue-400">新增空间意向项目</div>
+             <p class="text-xs text-[var(--text-secondary)] max-w-xs">创建一个新的空间分区或材质主题，并在详情页中批量上传多张参考图</p>
+           </div>`
+        : "";
+
+      container.innerHTML = `<div class="${gridClass}">${cardsHtml}${addProjectCardHtml}</div>`;
+    }
+
+    function handleCardClick(event, projId) {
+      // If user clicked an editable text in Edit Mode, don't navigate away
+      if (isEditMode && event.target.isContentEditable) return;
+      openProjectDetail(projId, true);
+    }
+
+    // Index Hover Preview helpers
+    function showIndexHoverPreview(e, imgUrl) {
+      const box = document.getElementById("index-hover-preview");
+      const img = document.getElementById("index-hover-img");
+      img.src = imgUrl;
+      box.classList.remove("hidden");
+      requestAnimationFrame(() => {
+        box.style.opacity = "1";
+      });
+      moveIndexHoverPreview(e);
+    }
+
+    function moveIndexHoverPreview(e) {
+      const box = document.getElementById("index-hover-preview");
+      const x = Math.min(window.innerWidth - 340, e.clientX + 24);
+      const y = Math.min(window.innerHeight - 240, Math.max(80, e.clientY - 110));
+      box.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    }
+
+    function hideIndexHoverPreview() {
+      const box = document.getElementById("index-hover-preview");
+      box.style.opacity = "0";
+      setTimeout(() => box.classList.add("hidden"), 200);
+    }
+
+    /*************************************************************************
+     * 6. RENDERING: PROJECT DETAIL PAGE (Sub-images, Specs, Next Project)
+     *************************************************************************/
+    function setDetailLayout(layout) {
+      appData.settings.detailLayout = layout;
+      saveState();
+      if (currentProjectId) renderProjectDetail(currentProjectId);
+    }
+
+    function renderProjectDetail(projId) {
+      const projIdx = appData.projects.findIndex((p) => p.id === projId);
+      if (projIdx === -1) return;
+      const proj = appData.projects[projIdx];
+      const pad2 = (n) => String(n).padStart(2, "0");
+      const projNum = pad2(projIdx + 1);
+
+      // Update Top Index Indicator
+      document.getElementById("detail-index-indicator").innerText = `PROJECT ${projNum} / ${pad2(appData.projects.length)} — ${proj.subtitle || "ARCHIVE"}`;
+
+      // Update Detail Layout Buttons
+      const detailLayout = appData.settings.detailLayout || "two-col";
+      ["two-col", "full", "compact"].forEach((l) => {
+        const btn = document.getElementById(`detail-layout-${l}`);
+        if (btn) {
+          btn.className =
+            l === detailLayout
+              ? "px-2.5 py-1 rounded-md text-xs font-medium bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-sm transition-all"
+              : "px-2.5 py-1 rounded-md text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all";
+        }
+      });
+
+      // Toggle Edit Mode Upload Controls inside Detail Page
+      const uploadBar = document.getElementById("detail-edit-upload-bar");
+      const dropzone = document.getElementById("detail-dropzone");
+      if (isEditMode) {
+        uploadBar.classList.remove("hidden");
+        uploadBar.classList.add("flex");
+        dropzone.classList.remove("hidden");
+      } else {
+        uploadBar.classList.add("hidden");
+        uploadBar.classList.remove("flex");
+        dropzone.classList.add("hidden");
+      }
+
+      // Render Project Editorial Spec Header
+      const tagsHtml = (proj.tags || [])
+        .map(
+          (tag, tIdx) => `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs hairline-all bg-black/[0.02] dark:bg-white/[0.03]">
+            <span contenteditable="${isEditMode}" onblur="updateProjectTag('${proj.id}', ${tIdx}, this.innerText)">${escapeHtml(tag)}</span>
+            ${
+              isEditMode
+                ? `<button onclick="removeProjectTag('${proj.id}', ${tIdx})" class="text-red-500 hover:text-red-700 font-bold leading-none" title="删除标签">×</button>`
+                : ""
+            }
+          </span>`
+        )
+        .join("");
+
+      const addTagBtnHtml = isEditMode
+        ? `<button onclick="addProjectTag('${proj.id}')" class="px-2.5 py-1 rounded-full text-xs border border-dashed border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10">+ 添加关键词</button>`
+        : "";
+
+      document.getElementById("detail-header-container").innerHTML = `
+        <div class="lg:col-span-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="font-mono text-xs px-2 py-0.5 rounded hairline-all text-[var(--text-secondary)] tabular-nums">NO. ${projNum}</span>
+            <span class="text-xs font-mono uppercase tracking-wider text-[var(--text-secondary)]"
+                  contenteditable="${isEditMode}"
+                  onblur="updateProjectField('${proj.id}', 'category', this.innerText)">${escapeHtml(proj.category)}</span>
+          </div>
+
+          <div class="space-y-1.5">
+            <h1 class="text-2xl sm:text-4xl font-normal tracking-[-0.025em] leading-tight"
+                contenteditable="${isEditMode}"
+                onblur="updateProjectField('${proj.id}', 'title', this.innerText)">${escapeHtml(proj.title)}</h1>
+            <p class="text-xs sm:text-sm font-mono uppercase tracking-widest text-[var(--text-muted)]"
+               contenteditable="${isEditMode}"
+               onblur="updateProjectField('${proj.id}', 'subtitle', this.innerText)">${escapeHtml(proj.subtitle || "")}</p>
+          </div>
+
+          <div class="pt-2 flex flex-wrap items-center gap-2">
+            ${tagsHtml}
+            ${addTagBtnHtml}
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 space-y-6 lg:border-l lg:border-[var(--border-hairline)] lg:pl-10">
+          <div class="space-y-2">
+            <div class="text-[11px] font-mono uppercase tracking-widest text-[var(--text-muted)]">CURATORIAL & SPATIAL NOTES / 空间意向推导说明</div>
+            <p class="text-sm sm:text-[15px] text-[var(--text-primary)] leading-relaxed whitespace-pre-line"
+               contenteditable="${isEditMode}"
+               onblur="updateProjectField('${proj.id}', 'description', this.innerText)">${escapeHtml(proj.description || "")}</p>
+          </div>
+
+          <!-- Architectural Technical Spec Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 hairline-t text-xs">
+            <div>
+              <div class="text-[10px] font-mono uppercase text-[var(--text-muted)] mb-1">REFERENCE / 参考对标</div>
+              <div class="font-medium text-[var(--text-secondary)]"
+                   contenteditable="${isEditMode}"
+                   onblur="updateProjectField('${proj.id}', 'location', this.innerText)">${escapeHtml(proj.location || "Studio Reference")}</div>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono uppercase text-[var(--text-muted)] mb-1">KEY MATERIAL / 核心材质建议</div>
+              <div class="font-medium text-[var(--text-secondary)]"
+                   contenteditable="${isEditMode}"
+                   onblur="updateProjectField('${proj.id}', 'material', this.innerText)">${escapeHtml(proj.material || "点击编辑材质建议")}</div>
+            </div>
+            <div>
+              <div class="text-[10px] font-mono uppercase text-[var(--text-muted)] mb-1">SCALE & LIGHTING / 尺度与光影</div>
+              <div class="font-medium text-[var(--text-secondary)]"
+                   contenteditable="${isEditMode}"
+                   onblur="updateProjectField('${proj.id}', 'lighting', this.innerText)">${escapeHtml(proj.lighting || "2700K-3000K 漫反射照明")}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Render Sub-Images Grid
+      const images = proj.images || [];
+      document.getElementById("detail-image-count-badge").innerText = `${images.length} PLATES`;
+
+      let subGridClass = "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-14";
+      let imgAspect = "aspect-[4/3]";
+      if (detailLayout === "full") {
+        subGridClass = "grid grid-cols-1 gap-16 max-w-5xl mx-auto";
+        imgAspect = "aspect-[16/10]";
+      } else if (detailLayout === "compact") {
+        subGridClass = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6";
+        imgAspect = "aspect-square";
+      }
+
+      const subImagesHtml = images
+        .map((img, iIdx) => {
+          const plateNum = `${projNum}.${iIdx + 1}`;
+          const isCover = proj.coverImage === img.url;
+
+          return `
+            <figure class="group flex flex-col space-y-3">
+              <div class="framer-img-wrap ${imgAspect} w-full rounded-sm hairline-all cursor-zoom-in"
+                   onclick="openLightbox('${proj.id}', ${iIdx})">
+                <img src="${escapeHtml(img.url)}"
+                     alt="${escapeHtml(img.title || "")}"
+                     onerror="this.src='https://placehold.co/1200x900/EAEAE6/666662?text=Reference+Plate'"
+                     class="framer-img w-full h-full object-cover" />
+
+                <!-- Plate Index Pill -->
+                <div class="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-white font-mono text-[11px] tabular-nums">
+                  ${plateNum}
+                </div>
+
+                ${
+                  isCover
+                    ? `<div class="absolute top-3 right-3 px-2 py-0.5 rounded bg-emerald-600/90 text-white font-mono text-[10px] uppercase tracking-wider">
+                         项目主封面 COVER
+                       </div>`
+                    : ""
+                }
+
+                <!-- Edit Mode Toolbar on each Sub-Image -->
+                ${
+                  isEditMode
+                    ? `<div class="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/90 via-black/60 to-transparent flex flex-wrap items-center justify-between gap-1.5" onclick="event.stopPropagation()">
+                         <div class="flex items-center gap-1">
+                           <button onclick="triggerSubImageFileUpload('${proj.id}', ${iIdx})" class="px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-medium">
+                             上传换图
+                           </button>
+                           <button onclick="openSubImageUrlModal('${proj.id}', ${iIdx})" class="px-2 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-[11px]">
+                             链接
+                           </button>
+                           <button onclick="setAsProjectCover('${proj.id}', ${iIdx})" class="px-2 py-1 rounded bg-white/20 hover:bg-white/30 text-white text-[11px]" title="将此图设为外层项目封面">
+                             设为封面
+                           </button>
+                         </div>
+                         <div class="flex items-center gap-1">
+                           <button onclick="moveSubImage('${proj.id}', ${iIdx}, -1)" class="w-6 h-6 rounded bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center" title="前移">←</button>
+                           <button onclick="moveSubImage('${proj.id}', ${iIdx}, 1)" class="w-6 h-6 rounded bg-white/20 hover:bg-white/30 text-white text-xs flex items-center justify-center" title="后移">→</button>
+                           <button onclick="deleteSubImage('${proj.id}', ${iIdx})" class="px-2 h-6 rounded bg-red-600/80 hover:bg-red-600 text-white text-[11px]">删除</button>
+                         </div>
+                       </div>`
+                    : ""
+                }
+              </div>
+
+              <!-- Sub-Image Node Title & Design Analysis Note -->
+              <figcaption class="pt-1 flex items-start justify-between gap-4">
+                <div class="space-y-1 flex-1">
+                  <div class="flex items-baseline gap-2.5">
+                    <span class="font-mono text-xs text-[var(--text-muted)] tabular-nums">${plateNum}</span>
+                    <h4 class="text-sm sm:text-[15px] font-medium text-[var(--text-primary)]"
+                        contenteditable="${isEditMode}"
+                        onblur="updateSubImageField('${proj.id}', ${iIdx}, 'title', this.innerText)">${escapeHtml(img.title || "点击输入节点部位名称")}</h4>
+                  </div>
+                  <p class="text-xs sm:text-[13px] text-[var(--text-secondary)] leading-relaxed pl-8"
+                     contenteditable="${isEditMode}"
+                     onblur="updateSubImageField('${proj.id}', ${iIdx}, 'note', this.innerText)">${escapeHtml(img.note || "点击输入该意向图的设计借鉴点、材质交接或尺度说明...")}</p>
+                </div>
+              </figcaption>
+            </figure>
+          `;
+        })
+        .join("");
+
+      document.getElementById("detail-images-container").innerHTML = `<div class="${subGridClass}">${subImagesHtml}</div>`;
+
+      // Render Next Project Footer Jump Card
+      const nextIdx = (projIdx + 1) % appData.projects.length;
+      const nextProj = appData.projects[nextIdx];
+      const nextNum = pad2(nextIdx + 1);
+
+      document.getElementById("detail-next-project-banner").innerHTML = `
+        <div onclick="openProjectDetail('${nextProj.id}', true)"
+             class="group cursor-pointer grid grid-cols-1 md:grid-cols-12 gap-6 items-center p-6 sm:p-8 rounded-xl hairline-all bg-black/[0.015] dark:bg-white/[0.02] hover:bg-black/[0.035] dark:hover:bg-white/[0.04] transition">
+          <div class="md:col-span-7 space-y-2">
+            <div class="text-[11px] font-mono uppercase tracking-widest text-[var(--text-muted)]">
+              NEXT ARCHIVE PROJECT / 下一组空间意向 (${nextNum} / ${pad2(appData.projects.length)})
+            </div>
+            <h3 class="text-xl sm:text-2xl font-medium group-hover:translate-x-1 transition-transform">
+              ${escapeHtml(nextProj.title)} →
+            </h3>
+            <p class="text-xs text-[var(--text-secondary)] line-clamp-2 max-w-xl">${escapeHtml(nextProj.description || "")}</p>
+          </div>
+          <div class="md:col-span-5">
+            <div class="framer-img-wrap aspect-[16/9] rounded-sm hairline-all">
+              <img src="${escapeHtml(nextProj.coverImage)}" alt="${escapeHtml(nextProj.title)}" class="framer-img w-full h-full object-cover" />
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /*************************************************************************
+     * 7. INTERACTIVE WYSIWYG EDITING & IMAGE MANAGEMENT LOGIC
+     *************************************************************************/
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      document.body.classList.toggle("edit-mode", isEditMode);
+
+      const banner = document.getElementById("edit-mode-banner");
+      const btn = document.getElementById("edit-mode-btn");
+      const dot = document.getElementById("edit-dot");
+      const label = document.getElementById("edit-mode-label");
+
+      if (isEditMode) {
+        banner.classList.remove("hidden");
+        btn.classList.add("bg-blue-600", "text-white", "border-blue-600");
+        dot.className = "w-1.5 h-1.5 rounded-full bg-white animate-ping";
+        label.innerText = "退出编辑";
+        showToast("已开启编辑模式：点击任意文字即可修改，悬停图片可替换或上传");
+      } else {
+        banner.classList.add("hidden");
+        btn.classList.remove("bg-blue-600", "text-white", "border-blue-600");
+        dot.className = "w-1.5 h-1.5 rounded-full bg-neutral-400";
+        label.innerText = "编辑内容";
+        showToast("已保存并退出编辑模式");
+      }
+
+      renderSiteMeta();
+      if (currentView === "home") {
+        renderHomePortfolio();
+      } else if (currentProjectId) {
+        renderProjectDetail(currentProjectId);
+      }
+    }
+
+    function updateProjectField(projId, field, value) {
+      if (!isEditMode) return;
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj) return;
+      proj[field] = value.trim();
+      saveState();
+      if (field === "category") renderCategories();
+      showToast("已保存项目修改");
+    }
+
+    function updateProjectTag(projId, tagIdx, value) {
+      if (!isEditMode) return;
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj || !proj.tags) return;
+      const clean = value.trim();
+      if (clean) {
+        proj.tags[tagIdx] = clean;
+      } else {
+        proj.tags.splice(tagIdx, 1);
+      }
+      saveState();
+      renderProjectDetail(projId);
+    }
+
+    function addProjectTag(projId) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj) return;
+      if (!proj.tags) proj.tags = [];
+      proj.tags.push("新材质/空间关键词");
+      saveState();
+      renderProjectDetail(projId);
+      showToast("已添加关键词，直接点击文字即可修改");
+    }
+
+    function removeProjectTag(projId, tagIdx) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj || !proj.tags) return;
+      proj.tags.splice(tagIdx, 1);
+      saveState();
+      renderProjectDetail(projId);
+    }
+
+    function updateSubImageField(projId, imgIdx, field, value) {
+      if (!isEditMode) return;
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj || !proj.images || !proj.images[imgIdx]) return;
+      proj.images[imgIdx][field] = value.trim();
+      saveState();
+      showToast("已自动保存意向图说明");
+    }
+
+    // Single Image Replacement (Cover or Sub-Image)
+    function triggerCoverFileUpload(projId) {
+      pendingImageAction = { type: "cover", projId };
+      document.getElementById("single-image-file-input").click();
+    }
+
+    function triggerSubImageFileUpload(projId, imgIdx) {
+      pendingImageAction = { type: "sub-replace", projId, imgIdx };
+      document.getElementById("single-image-file-input").click();
+    }
+
+    async function handleSingleImageFileSelected(event) {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file || !pendingImageAction) return;
+
+      showToast("正在优化并载入高清图片...");
+      try {
+        const dataUrl = await compressImageFile(file);
+        const proj = appData.projects.find((p) => p.id === pendingImageAction.projId);
+        if (!proj) return;
+
+        if (pendingImageAction.type === "cover") {
+          proj.coverImage = dataUrl;
+        } else if (pendingImageAction.type === "sub-replace") {
+          const oldUrl = proj.images[pendingImageAction.imgIdx].url;
+          proj.images[pendingImageAction.imgIdx].url = dataUrl;
+          if (proj.coverImage === oldUrl) {
+            proj.coverImage = dataUrl;
+          }
+        }
+        await saveState();
+        if (currentView === "home") renderHomePortfolio();
+        else renderProjectDetail(proj.id);
+        showToast("图片替换成功！");
+      } catch (err) {
+        showToast("图片读取失败，请重试");
+      }
+    }
+
+    // Batch Local Image Upload inside Project Detail
+    async function handleBatchSubImageUpload(event) {
+      const files = Array.from(event.target.files || []);
+      event.target.value = "";
+      if (!files.length || !currentProjectId) return;
+      await processBatchFilesForProject(currentProjectId, files);
+    }
+
+    async function handleDetailDrop(event) {
+      event.preventDefault();
+      event.currentTarget.classList.remove("border-blue-600");
+      const files = Array.from(event.dataTransfer?.files || []).filter((f) => f.type.startsWith("image/"));
+      if (!files.length || !currentProjectId) return;
+      await processBatchFilesForProject(currentProjectId, files);
+    }
+
+    async function processBatchFilesForProject(projId, files) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj) return;
+      showToast(`正在处理 ${files.length} 张高清意向图...`);
+      for (const file of files) {
+        try {
+          const dataUrl = await compressImageFile(file);
+          const cleanName = file.name.replace(/\.[^/.]+$/, "");
+          proj.images.push({
+            id: "img-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6),
+            url: dataUrl,
+            title: cleanName || "新增空间细部节点",
+            note: "点击此处填写该意向图的设计说明、材质选用或灯光尺度要求。"
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (!proj.coverImage && proj.images.length > 0) {
+        proj.coverImage = proj.images[0].url;
+      }
+      await saveState();
+      renderProjectDetail(projId);
+      showToast(`已成功导入 ${files.length} 张意向图！`);
+    }
+
+    // URL Modal Handlers
+    function openCoverUrlModal(projId) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      pendingImageAction = { type: "cover", projId };
+      document.getElementById("url-modal-title").innerText = "替换项目封面图片链接";
+      document.getElementById("url-modal-input").value = proj?.coverImage?.startsWith("data:") ? "" : (proj?.coverImage || "");
+      document.getElementById("url-modal-extra-fields").classList.add("hidden");
+      document.getElementById("url-modal").classList.remove("hidden");
+    }
+
+    function openSubImageUrlModal(projId, imgIdx) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      const img = proj?.images?.[imgIdx];
+      pendingImageAction = { type: "sub-replace", projId, imgIdx };
+      document.getElementById("url-modal-title").innerText = "替换此意向图链接";
+      document.getElementById("url-modal-input").value = img?.url?.startsWith("data:") ? "" : (img?.url || "");
+      document.getElementById("url-modal-extra-fields").classList.add("hidden");
+      document.getElementById("url-modal").classList.remove("hidden");
+    }
+
+    function openAddSubImageUrlModal() {
+      if (!currentProjectId) return;
+      pendingImageAction = { type: "sub-add", projId: currentProjectId };
+      document.getElementById("url-modal-title").innerText = "通过网络链接新增意向图";
+      document.getElementById("url-modal-input").value = "";
+      document.getElementById("url-modal-node-title").value = "";
+      document.getElementById("url-modal-node-note").value = "";
+      document.getElementById("url-modal-extra-fields").classList.remove("hidden");
+      document.getElementById("url-modal").classList.remove("hidden");
+    }
+
+    function closeUrlModal() {
+      document.getElementById("url-modal").classList.add("hidden");
+      pendingImageAction = null;
+    }
+
+    function confirmUrlModal() {
+      const url = document.getElementById("url-modal-input").value.trim();
+      if (!url || !pendingImageAction) {
+        closeUrlModal();
+        return;
+      }
+      const proj = appData.projects.find((p) => p.id === pendingImageAction.projId);
+      if (!proj) return;
+
+      if (pendingImageAction.type === "cover") {
+        proj.coverImage = url;
+      } else if (pendingImageAction.type === "sub-replace") {
+        proj.images[pendingImageAction.imgIdx].url = url;
+      } else if (pendingImageAction.type === "sub-add") {
+        const nodeTitle = document.getElementById("url-modal-node-title").value.trim() || "新增细部节点意向";
+        const nodeNote = document.getElementById("url-modal-node-note").value.trim() || "点击补充材质与空间尺度说明。";
+        proj.images.push({
+          id: "img-" + Date.now(),
+          url,
+          title: nodeTitle,
+          note: nodeNote
+        });
+      }
+
+      saveState();
+      closeUrlModal();
+      if (currentView === "home") renderHomePortfolio();
+      else renderProjectDetail(proj.id);
+      showToast("图片链接已更新");
+    }
+
+    // Sub-image Reorder / Cover / Delete
+    function setAsProjectCover(projId, imgIdx) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj || !proj.images[imgIdx]) return;
+      proj.coverImage = proj.images[imgIdx].url;
+      saveState();
+      renderProjectDetail(projId);
+      showToast("已将该图设为项目主封面");
+    }
+
+    function moveSubImage(projId, imgIdx, dir) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj || !proj.images) return;
+      const targetIdx = imgIdx + dir;
+      if (targetIdx < 0 || targetIdx >= proj.images.length) return;
+      const temp = proj.images[imgIdx];
+      proj.images[imgIdx] = proj.images[targetIdx];
+      proj.images[targetIdx] = temp;
+      saveState();
+      renderProjectDetail(projId);
+    }
+
+    function deleteSubImage(projId, imgIdx) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj || !proj.images) return;
+      if (proj.images.length <= 1) {
+        showToast("每个项目至少保留 1 张意向图");
+        return;
+      }
+      proj.images.splice(imgIdx, 1);
+      saveState();
+      renderProjectDetail(projId);
+      showToast("已删除该意向图");
+    }
+
+    // Project Reorder / Duplicate / Delete / Create
+    function moveProject(projIdx, dir) {
+      const targetIdx = projIdx + dir;
+      if (targetIdx < 0 || targetIdx >= appData.projects.length) return;
+      const temp = appData.projects[projIdx];
+      appData.projects[projIdx] = appData.projects[targetIdx];
+      appData.projects[targetIdx] = temp;
+      saveState();
+      renderHomePortfolio();
+    }
+
+    function duplicateProject(projId) {
+      const idx = appData.projects.findIndex((p) => p.id === projId);
+      if (idx === -1) return;
+      const copy = JSON.parse(JSON.stringify(appData.projects[idx]));
+      copy.id = "proj-" + Date.now();
+      copy.title = copy.title + " (副本)";
+      appData.projects.splice(idx + 1, 0, copy);
+      saveState();
+      renderCategories();
+      renderHomePortfolio();
+      showToast("已复制项目");
+    }
+
+    function deleteProjectConfirm(projId) {
+      if (appData.projects.length <= 1) {
+        showToast("作品集至少需保留 1 个项目");
+        return;
+      }
+      const proj = appData.projects.find((p) => p.id === projId);
+      openConfirmModal(
+        "删除意向项目",
+        `确定要删除「${proj?.title || ""}」及其内部的所有细部意向图吗？`,
+        () => {
+          appData.projects = appData.projects.filter((p) => p.id !== projId);
+          saveState();
+          renderCategories();
+          renderHomePortfolio();
+          showToast("已删除项目");
+        }
+      );
+    }
+
+    function openNewProjectModal() {
+      document.getElementById("new-proj-title").value = "";
+      document.getElementById("new-proj-subtitle").value = "";
+      document.getElementById("new-proj-category").value = "";
+      document.getElementById("new-proj-location").value = "";
+      document.getElementById("new-proj-desc").value = "";
+      document.getElementById("new-proj-cover-file").value = "";
+      document.getElementById("new-project-modal").classList.remove("hidden");
+    }
+
+    function closeNewProjectModal() {
+      document.getElementById("new-project-modal").classList.add("hidden");
+    }
+
+    async function createNewProject() {
+      const title = document.getElementById("new-proj-title").value.trim() || "新建空间意向分区";
+      const subtitle = document.getElementById("new-proj-subtitle").value.trim() || "SPATIAL DIRECTION";
+      const category = document.getElementById("new-proj-category").value.trim() || "空间意向 Spatial";
+      const location = document.getElementById("new-proj-location").value.trim() || "Ref: Studio Moodboard";
+      const desc = document.getElementById("new-proj-desc").value.trim() || "点击此处编辑本分区的核心设计策略、材质搭配与空间尺度说明。";
+      const fileInput = document.getElementById("new-proj-cover-file");
+
+      let coverUrl = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=85";
+      if (fileInput.files && fileInput.files[0]) {
+        coverUrl = await compressImageFile(fileInput.files[0]);
+      }
+
+      const newId = "proj-" + Date.now();
+      const newProj = {
+        id: newId,
+        title,
+        subtitle,
+        category,
+        location,
+        scale: "点击编辑空间尺度",
+        material: "点击编辑核心材质",
+        lighting: "2700K 漫反射照明",
+        tags: ["空间氛围", "材质细部"],
+        description: desc,
+        coverImage: coverUrl,
+        images: [
+          {
+            id: "img-" + Date.now(),
+            url: coverUrl,
+            title: "核心空间视角意向",
+            note: "在编辑模式下，您可以点击上方「批量上传本地意向图」一次性导入多张参考图。"
+          }
+        ]
+      };
+
+      appData.projects.push(newProj);
+      await saveState();
+      closeNewProjectModal();
+      renderCategories();
+      if (!isEditMode) toggleEditMode();
+      openProjectDetail(newId, true);
+      showToast("已创建新项目，现在可以批量上传细部意向图！");
+    }
+
+    /*************************************************************************
+     * 8. FULLSCREEN HIGH-RES LIGHTBOX VIEWER
+     *************************************************************************/
+    function openLightbox(projId, imgIdx) {
+      const proj = appData.projects.find((p) => p.id === projId);
+      if (!proj || !proj.images || !proj.images.length) return;
+      lightboxImages = proj.images;
+      lightboxIndex = imgIdx;
+      lightboxZoomed = false;
+
+      document.getElementById("lightbox-project-title").innerText = `${proj.title} — ${proj.subtitle || ""}`;
+      document.getElementById("lightbox-modal").classList.remove("hidden");
+      updateLightboxSlide();
+    }
+
+    function updateLightboxSlide() {
+      const item = lightboxImages[lightboxIndex];
+      if (!item) return;
+      const imgEl = document.getElementById("lightbox-img");
+      imgEl.src = item.url;
+      imgEl.style.transform = "scale(1)";
+      lightboxZoomed = false;
+      document.getElementById("lightbox-zoom-btn").innerText = "ZOOM 1.8x";
+
+      document.getElementById("lightbox-counter").innerText = `${String(lightboxIndex + 1).padStart(2, "0")} / ${String(lightboxImages.length).padStart(2, "0")}`;
+      document.getElementById("lightbox-caption-title").innerText = item.title || "";
+      document.getElementById("lightbox-caption-note").innerText = item.note || "";
+    }
+
+    function stepLightbox(dir) {
+      if (!lightboxImages.length) return;
+      lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length;
+      updateLightboxSlide();
+    }
+
+    function toggleLightboxZoom() {
+      const imgEl = document.getElementById("lightbox-img");
+      lightboxZoomed = !lightboxZoomed;
+      imgEl.style.transform = lightboxZoomed ? "scale(1.8)" : "scale(1)";
+      imgEl.classList.toggle("cursor-zoom-in", !lightboxZoomed);
+      imgEl.classList.toggle("cursor-zoom-out", lightboxZoomed);
+      document.getElementById("lightbox-zoom-btn").innerText = lightboxZoomed ? "RESET 1.0x" : "ZOOM 1.8x";
+    }
+
+    function handleLightboxBackdropClick(e) {
+      if (e.target === e.currentTarget) closeLightbox();
+    }
+
+    function closeLightbox() {
+      document.getElementById("lightbox-modal").classList.add("hidden");
+    }
+
+    /*************************************************************************
+     * 9. INFO DRAWER, THEME TOGGLE & EXPORT STANDALONE HTML ENGINE
+     *************************************************************************/
+    function toggleInfoDrawer() {
+      const drawer = document.getElementById("info-drawer");
+      drawer.classList.toggle("hidden");
+    }
+
+    function toggleTheme() {
+      const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
+      applyTheme(next);
+      appData.settings.theme = next;
+      saveState();
+    }
+
+    function applyTheme(theme) {
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+        document.documentElement.classList.remove("light");
+      } else {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.add("light");
+      }
+    }
+
+    function openExportModal() {
+      document.getElementById("export-modal").classList.remove("hidden");
+    }
+
+    function closeExportModal() {
+      document.getElementById("export-modal").classList.add("hidden");
+    }
+
+    function exportStandaloneHTML(presentationOnly = true) {
+      // Clone current HTML document and embed current appData into #embedded-initial-state
+      const wasEdit = isEditMode;
+      if (wasEdit) toggleEditMode(); // Ensure clean DOM snapshot without contenteditable outlines
+
+      const docClone = document.documentElement.cloneNode(true);
+      const stateScript = docClone.querySelector("#embedded-initial-state");
+      if (stateScript) {
+        stateScript.textContent = `\nwindow.__EXPORTED_PRESENTATION_ONLY__ = ${presentationOnly ? "true" : "false"};\nwindow.__PRELOADED_PORTFOLIO_DATA__ = ${JSON.stringify(appData)};\n`;
+      }
+
+      // Close modal inside cloned DOM
+      const expModal = docClone.querySelector("#export-modal");
+      if (expModal) expModal.classList.add("hidden");
+
+      const fullHtml = "<!DOCTYPE html>\n" + docClone.outerHTML;
+      const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const dateStr = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = presentationOnly
+        ? `空间意向汇报-${dateStr}-领导审阅版.html`
+        : `空间意向汇报-${dateStr}-可编辑版.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      closeExportModal();
+      showToast(presentationOnly ? "已生成「领导审阅纯净版」HTML 文件！" : "已生成「可继续编辑版」HTML 文件！");
+    }
+
+    function exportJsonBackup() {
+      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `theo-portfolio-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("已导出 JSON 数据备份");
+    }
+
+    function importJsonBackup(event) {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && Array.isArray(parsed.projects)) {
+            appData = parsed;
+            await saveState();
+            renderSiteMeta();
+            renderCategories();
+            navigateHome();
+            closeExportModal();
+            showToast("成功导入备份数据！");
+          } else {
+            showToast("JSON 文件格式不正确");
+          }
+        } catch (err) {
+          showToast("解析备份文件失败");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetToDefaultConfirm() {
+      openConfirmModal(
+        "恢复初始模板数据",
+        "确定要将网站恢复为初始的 6 组空间意向示例数据吗？您当前上传的图片和修改将被重置。",
+        async () => {
+          appData = JSON.parse(JSON.stringify(DEFAULT_PORTFOLIO_DATA));
+          await saveState();
+          renderSiteMeta();
+          renderCategories();
+          navigateHome();
+          showToast("已恢复默认模板数据");
+        }
+      );
+    }
+
+    /*************************************************************************
+     * 10. UTILITIES (Confirm Modal, Toast, HTML Escape)
+     *************************************************************************/
+    let confirmCallback = null;
+    function openConfirmModal(title, desc, onConfirm) {
+      document.getElementById("confirm-modal-title").innerText = title;
+      document.getElementById("confirm-modal-desc").innerText = desc;
+      confirmCallback = onConfirm;
+      document.getElementById("confirm-modal").classList.remove("hidden");
+      document.getElementById("confirm-modal-ok-btn").onclick = () => {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+      };
+    }
+
+    function closeConfirmModal() {
+      document.getElementById("confirm-modal").classList.add("hidden");
+      confirmCallback = null;
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.innerText = msg;
+      t.classList.remove("hidden");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        t.classList.add("hidden");
+      }, 2800);
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+
+</body></html>
